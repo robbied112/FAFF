@@ -1,0 +1,856 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Friends are Friends Forever — Weekly Match</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+    
+    :root {
+      --bg-primary: #0a0d1a;
+      --bg-secondary: #131829;
+      --bg-tertiary: #1a1f37;
+      --surface: rgba(26, 31, 55, 0.8);
+      --surface-hover: rgba(26, 31, 55, 0.95);
+      --border: rgba(255, 255, 255, 0.08);
+      --border-hover: rgba(255, 255, 255, 0.15);
+      --text-primary: #ffffff;
+      --text-secondary: #a8b3cf;
+      --text-muted: #6b7589;
+      --accent: #3b82f6;
+      --accent-hover: #2563eb;
+      --accent-glow: rgba(59, 130, 246, 0.3);
+      --success: #10b981;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      --gradient-primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      --gradient-surface: linear-gradient(135deg, rgba(26, 31, 55, 0.9) 0%, rgba(19, 24, 41, 0.9) 100%);
+      --gradient-button: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+      --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
+      --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.07), 0 2px 4px rgba(0, 0, 0, 0.06);
+      --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1), 0 4px 6px rgba(0, 0, 0, 0.05);
+      --shadow-xl: 0 25px 50px rgba(0, 0, 0, 0.25);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html, body {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg-primary);
+      background-image: 
+        radial-gradient(circle at 20% 50%, rgba(59, 130, 246, 0.1) 0%, transparent 50%),
+        radial-gradient(circle at 80% 20%, rgba(139, 92, 246, 0.1) 0%, transparent 50%),
+        radial-gradient(circle at 40% 80%, rgba(236, 72, 153, 0.05) 0%, transparent 50%);
+      color: var(--text-primary);
+      line-height: 1.6;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 2rem 1rem;
+    }
+
+    .header-card {
+      background: var(--gradient-surface);
+      backdrop-filter: blur(20px);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      padding: 2rem;
+      margin-bottom: 2rem;
+      box-shadow: var(--shadow-xl);
+      position: relative;
+      overflow: hidden;
+      animation: slideInUp 0.6s ease-out;
+    }
+
+    .header-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    }
+
+    .header-title {
+      font-size: 2.5rem;
+      font-weight: 700;
+      margin: 0 0 0.5rem 0;
+      background: var(--gradient-primary);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .header-subtitle {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      margin-bottom: 1rem;
+    }
+
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 1rem;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border);
+      border-radius: 9999px;
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: var(--text-secondary);
+      backdrop-filter: blur(10px);
+      transition: all 0.2s ease;
+    }
+
+    .tag:hover {
+      border-color: var(--border-hover);
+      background: rgba(255, 255, 255, 0.08);
+    }
+
+    .tag-primary {
+      background: var(--accent-glow);
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    .description {
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      margin: 0;
+      line-height: 1.5;
+    }
+
+    .main-grid {
+      display: grid;
+      gap: 2rem;
+      grid-template-columns: 1fr;
+    }
+
+    @media (min-width: 1024px) {
+      .main-grid {
+        grid-template-columns: 400px 1fr;
+      }
+    }
+
+    .card {
+      background: var(--gradient-surface);
+      backdrop-filter: blur(20px);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 1.5rem;
+      box-shadow: var(--shadow-lg);
+      transition: all 0.3s ease;
+      animation: slideInUp 0.6s ease-out;
+      animation-delay: 0.2s;
+      opacity: 0;
+      animation-fill-mode: forwards;
+    }
+
+    .card:hover {
+      border-color: var(--border-hover);
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-xl);
+    }
+
+    .card-title {
+      font-size: 1.25rem;
+      font-weight: 600;
+      margin: 0 0 1.5rem 0;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .form-group {
+      margin-bottom: 1.5rem;
+    }
+
+    .form-label {
+      display: block;
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: var(--text-secondary);
+      margin-bottom: 0.5rem;
+    }
+
+    .form-input, .form-textarea, .form-select {
+      width: 100%;
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 0.75rem 1rem;
+      color: var(--text-primary);
+      font-size: 0.9rem;
+      transition: all 0.2s ease;
+      backdrop-filter: blur(10px);
+    }
+
+    .form-input:focus, .form-textarea:focus, .form-select:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px var(--accent-glow);
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    .form-textarea {
+      min-height: 120px;
+      font-family: 'SF Mono', 'Monaco', 'Menlo', 'Roboto Mono', monospace;
+      font-size: 0.85rem;
+      resize: vertical;
+    }
+
+    .form-grid {
+      display: grid;
+      gap: 1rem;
+      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    }
+
+    .button-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      align-items: center;
+      margin-top: 1.5rem;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.75rem 1.25rem;
+      font-size: 0.9rem;
+      font-weight: 600;
+      border-radius: 12px;
+      border: 1px solid transparent;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      text-decoration: none;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+      transition: left 0.5s ease;
+    }
+
+    .btn:hover::before {
+      left: 100%;
+    }
+
+    .btn-primary {
+      background: var(--gradient-button);
+      color: white;
+      box-shadow: var(--shadow-md);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-1px);
+      box-shadow: var(--shadow-lg);
+      filter: brightness(1.05);
+    }
+
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.05);
+      border-color: var(--border);
+      color: var(--text-primary);
+    }
+
+    .btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.1);
+      border-color: var(--border-hover);
+      transform: translateY(-1px);
+    }
+
+    .btn-ghost {
+      background: transparent;
+      border-color: var(--border);
+      color: var(--text-secondary);
+    }
+
+    .btn-ghost:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+      background: var(--accent-glow);
+    }
+
+    .audit-tag {
+      margin-left: auto;
+      font-family: 'SF Mono', 'Monaco', 'Menlo', 'Roboto Mono', monospace;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      padding: 0.25rem 0.5rem;
+      background: rgba(255, 255, 255, 0.02);
+      border-radius: 6px;
+      border: 1px solid var(--border);
+    }
+
+    .schedule-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1.5rem;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .schedule-info {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 0.75rem 1.25rem;
+      background: rgba(59, 130, 246, 0.1);
+      border: 1px solid rgba(59, 130, 246, 0.2);
+      border-radius: 12px;
+    }
+
+    .schedule-title {
+      font-weight: 600;
+      color: var(--accent);
+    }
+
+    .schedule-subtitle {
+      color: var(--text-muted);
+    }
+
+    .table-container {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      overflow: hidden;
+      backdrop-filter: blur(10px);
+    }
+
+    .table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .table th {
+      background: var(--bg-tertiary);
+      padding: 1rem 0.75rem;
+      text-align: left;
+      font-weight: 600;
+      color: var(--text-secondary);
+      font-size: 0.875rem;
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    .table td {
+      padding: 0.875rem 0.75rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+      color: var(--text-primary);
+      font-size: 0.9rem;
+    }
+
+    .table tbody tr {
+      transition: all 0.2s ease;
+    }
+
+    .table tbody tr:hover {
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    .week-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 2rem;
+      height: 1.5rem;
+      background: var(--accent-glow);
+      color: var(--accent);
+      border-radius: 6px;
+      font-size: 0.8rem;
+      font-weight: 600;
+    }
+
+    .revealed-row {
+      background: rgba(16, 185, 129, 0.1) !important;
+      border-left: 3px solid var(--success);
+    }
+
+    .footer {
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 0.85rem;
+      margin-top: 3rem;
+      padding: 1.5rem;
+      opacity: 0.7;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 3rem 1rem;
+      color: var(--text-muted);
+    }
+
+    .empty-state-icon {
+      font-size: 3rem;
+      margin-bottom: 1rem;
+      opacity: 0.5;
+    }
+
+    @keyframes slideInUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes glow {
+      0%, 100% { box-shadow: 0 0 20px rgba(59, 130, 246, 0.3); }
+      50% { box-shadow: 0 0 30px rgba(59, 130, 246, 0.5); }
+    }
+
+    .generating {
+      animation: glow 2s ease-in-out infinite;
+    }
+
+    /* Mobile responsiveness */
+    @media (max-width: 768px) {
+      .container {
+        padding: 1rem;
+      }
+      
+      .header-card {
+        padding: 1.5rem;
+        text-align: center;
+      }
+      
+      .header-title {
+        font-size: 2rem;
+      }
+      
+      .button-group {
+        flex-direction: column;
+        align-items: stretch;
+      }
+      
+      .btn {
+        justify-content: center;
+      }
+      
+      .schedule-header {
+        flex-direction: column;
+        text-align: center;
+      }
+      
+      .audit-tag {
+        margin-left: 0;
+        margin-top: 0.5rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header-card">
+      <h1 class="header-title">Friends are Friends Forever</h1>
+      <div class="header-subtitle">
+        <div class="tag tag-primary">Weekly Death Match</div>
+        <div class="tag">No backend • Shareable URL • Verifiable randomness</div>
+      </div>
+      <p class="description">Single‑file app. Open locally or host on GitHub Pages/Netlify. Anyone with the link can verify the exact same weekly assignments.</p>
+    </div>
+
+    <div class="main-grid">
+      <div class="card">
+        <h2 class="card-title">⚙️ Setup</h2>
+        
+        <div class="form-group">
+          <label class="form-label">Game name</label>
+          <input class="form-input" id="gameName" value="Friends are Friends Forever"/>
+        </div>
+        
+        <div class="form-group">
+          <label class="form-label">Subtitle</label>
+          <input class="form-input" id="subtitle" value="Weekly Death Match"/>
+        </div>
+
+        <div class="form-grid">
+          <div class="form-group">
+            <label class="form-label">Weeks</label>
+            <input class="form-input" id="weeks" type="number" min="1" max="30" value="14"/>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Unique teams per week</label>
+            <select class="form-select" id="uniquePerWeek">
+              <option value="1" selected>Yes (no duplicates)</option>
+              <option value="0">No (duplicates allowed)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Season repeats</label>
+            <select class="form-select" id="seasonRepeats">
+              <option value="1" selected>Allowed (simplest)</option>
+              <option value="0">Avoid until all used</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Participants (one per line)</label>
+          <textarea class="form-textarea" id="participants">Robbie
+Shane</textarea>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Teams (one per line)</label>
+          <textarea class="form-textarea" id="teams">Bham Bobs
+Sunday Morning Wood
+Naturally Le'Veon'd
+Floatisha's Team
+CLOX
+Whoa Joes
+Ginger Balls
+Pfffffffffft
+Hawk Heaven
+Turbo Team</textarea>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Seed (shared so results are reproducible)</label>
+          <input class="form-input" id="seed" placeholder="e.g., 2025‑Season‑Hash"/>
+          <div class="description" style="margin-top: 0.5rem; font-size: 0.8rem;">Anyone can verify the draw: same inputs + seed ⇒ same schedule. Change seed to re‑roll a fresh season.</div>
+        </div>
+
+        <div class="button-group">
+          <button class="btn btn-primary" id="generate">🎲 Generate Season</button>
+          <button class="btn btn-secondary" id="revealOne">👁️ Reveal Next Week</button>
+          <button class="btn btn-ghost" id="share">🔗 Share Link</button>
+          <button class="btn btn-ghost" id="exportCsv">📊 Export CSV</button>
+          <span class="audit-tag" id="hashOut">Audit tag</span>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2 class="card-title">📅 Schedule</h2>
+        <div id="scheduleWrap" class="empty-state">
+          <div class="empty-state-icon">🎯</div>
+          <p>Click "Generate Season" to create your weekly matchups</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer">
+      © <span id="yr"></span> FAF Forever. This page uses a deterministic PRNG (Mulberry32) seeded by your seed + week to keep it fair and auditable.
+    </div>
+  </div>
+
+<script>
+// ---------- Utilities ----------
+const $ = (q) => document.querySelector(q);
+const nl = (id) => $(id).value.split(/\n+/).map(s => s.trim()).filter(Boolean);
+
+function cyrb128(str) {
+  let h1 = 1779033703, h2 = 3144134277, h3 = 1013904242, h4 = 2773480762;
+  for (let i = 0; i < str.length; i++) {
+    let k = str.charCodeAt(i);
+    h1 = h2 ^ Math.imul(h1 ^ k, 597399067);
+    h2 = h3 ^ Math.imul(h2 ^ k, 2869860233);
+    h3 = h4 ^ Math.imul(h3 ^ k, 951274213);
+    h4 = h1 ^ Math.imul(h4 ^ k, 2716044179);
+  }
+  h1 = Math.imul(h3 ^ (h1 >>> 18), 597399067);
+  h2 = Math.imul(h4 ^ (h2 >>> 22), 2869860233);
+  h3 = Math.imul(h1 ^ (h3 >>> 17), 951274213);
+  h4 = Math.imul(h2 ^ (h4 >>> 19), 2716044179);
+  return [(h1 ^ h2 ^ h3 ^ h4) >>> 0, (h2 ^ h1) >>> 0, (h3 ^ h1) >>> 0, (h4 ^ h1) >>> 0];
+}
+
+function mulberry32(a) {
+  return function() {
+    a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a);
+    t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296;
+  }
+}
+
+function seededRng(seedStr) { const [h] = cyrb128(seedStr); return mulberry32(h); }
+
+function shuffle(arr, rnd) {
+  const a = arr.slice(); 
+  for (let i = a.length - 1; i > 0; i--) { 
+    const j = Math.floor(rnd() * (i + 1)); 
+    [a[i], a[j]] = [a[j], a[i]]; 
+  } 
+  return a; 
+}
+
+function encodeStateToUrl() {
+  const state = {
+    g: $('#gameName').value, s: $('#subtitle').value, w: $('#weeks').value,
+    u: $('#uniquePerWeek').value, r: $('#seasonRepeats').value,
+    p: nl('#participants'), t: nl('#teams'), d: $('#seed').value
+  };
+  const url = new URL(location.href);
+  url.searchParams.set('state', btoa(unescape(encodeURIComponent(JSON.stringify(state)))));
+  history.replaceState(null, '', url.toString());
+  return url.toString();
+}
+
+function decodeStateFromUrl() {
+  const sp = new URLSearchParams(location.search).get('state');
+  if (!sp) return;
+  try {
+    const state = JSON.parse(decodeURIComponent(escape(atob(sp))));
+    $('#gameName').value = state.g || $('#gameName').value;
+    $('#subtitle').value = state.s || $('#subtitle').value;
+    $('#weeks').value = state.w || $('#weeks').value;
+    $('#uniquePerWeek').value = state.u || '1';
+    $('#seasonRepeats').value = state.r || '1';
+    $('#seed').value = state.d || '';
+    if (state.p) $('#participants').value = state.p.join('\n');
+    if (state.t) $('#teams').value = state.t.join('\n');
+  } catch (e) { 
+    console.warn('bad state in URL'); 
+  }
+}
+
+function inputHash() {
+  const raw = [$('#gameName').value, $('#subtitle').value, $('#weeks').value, $('#uniquePerWeek').value, $('#seasonRepeats').value, $('#participants').value, $('#teams').value, $('#seed').value].join('|');
+  return cyrb128(raw)[0].toString(16).slice(0, 8).toUpperCase();
+}
+
+function buildSchedule() {
+  const generateBtn = $('#generate');
+  generateBtn.classList.add('generating');
+  generateBtn.textContent = '🎲 Generating...';
+  
+  setTimeout(() => {
+    const gameName = $('#gameName').value.trim();
+    const subtitle = $('#subtitle').value.trim();
+    const weeks = Math.max(1, Math.min(30, parseInt($('#weeks').value || '14', 10)));
+    const participants = nl('#participants');
+    const teams = nl('#teams');
+    const seed = $('#seed').value.trim() || 'FAF-' + new Date().toISOString().slice(0, 10);
+    const uniquePerWeek = $('#uniquePerWeek').value === '1';
+    const seasonRepeats = $('#seasonRepeats').value === '1';
+    
+    if (participants.length < 2) { 
+      alert('Add at least two participants.'); 
+      generateBtn.classList.remove('generating');
+      generateBtn.textContent = '🎲 Generate Season';
+      return; 
+    }
+    if (teams.length < participants.length) { 
+      alert('Need ≥ as many teams as participants.'); 
+      generateBtn.classList.remove('generating');
+      generateBtn.textContent = '🎲 Generate Season';
+      return; 
+    }
+
+    const out = [];
+    const usedByParticipant = Object.fromEntries(participants.map(p => [p, new Set()]));
+
+    for (let w = 1; w <= weeks; w++) {
+      const rng = seededRng(`${seed}::week${w}`);
+      let pool = teams.slice();
+
+      const picks = {};
+      for (const p of participants) {
+        let available = pool.slice();
+        if (!seasonRepeats) {
+          const avoid = usedByParticipant[p];
+          const filtered = available.filter(t => !avoid.has(t));
+          if (filtered.length > 0) available = filtered;
+        }
+        
+        if (uniquePerWeek) {
+          const idx = Math.floor(rng() * available.length);
+          const team = available[idx];
+          picks[p] = team;
+          pool = pool.filter(t => t !== team);
+        } else {
+          const idx = Math.floor(rng() * available.length);
+          picks[p] = available[idx];
+        }
+        usedByParticipant[p].add(picks[p]);
+      }
+      out.push({ week: w, picks });
+    }
+
+    // Render with animation
+    const sched = document.createElement('div');
+    
+    const hdr = document.createElement('div');
+    hdr.className = 'schedule-header';
+    hdr.innerHTML = `
+      <div class="schedule-info">
+        <div class="schedule-title">${gameName}</div>
+        <div class="schedule-subtitle">• ${subtitle}</div>
+      </div>
+      <div class="audit-tag">Audit: ${inputHash()}</div>
+    `;
+    sched.appendChild(hdr);
+
+    const tableContainer = document.createElement('div');
+    tableContainer.className = 'table-container';
+    
+    const table = document.createElement('table');
+    table.className = 'table';
+    
+    const thead = document.createElement('thead');
+    const thRow = document.createElement('tr');
+    thRow.innerHTML = '<th>Week</th>' + participants.map(p => `<th>${p}</th>`).join('');
+    thead.appendChild(thRow); 
+    table.appendChild(thead);
+    
+    const tbody = document.createElement('tbody');
+    out.forEach((row, index) => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `<td><span class="week-badge">${row.week}</span></td>` + 
+                     participants.map(p => `<td>${row.picks[p]}</td>`).join('');
+      tbody.appendChild(tr);
+      
+      // Stagger row animations
+      setTimeout(() => {
+        tr.style.animation = 'slideInUp 0.3s ease-out forwards';
+      }, index * 50);
+    });
+    table.appendChild(tbody);
+    tableContainer.appendChild(table);
+    sched.appendChild(tableContainer);
+
+    const wrap = $('#scheduleWrap');
+    wrap.innerHTML = '';
+    wrap.appendChild(sched);
+
+    $('#hashOut').textContent = 'Audit: ' + inputHash();
+    encodeStateToUrl();
+    
+    generateBtn.classList.remove('generating');
+    generateBtn.textContent = '🎲 Generate Season';
+    
+    return out;
+  }, 100);
+}
+
+function revealNext() {
+  const schedule = buildSchedule();
+  if (!schedule) return;
+  
+  const url = new URL(location.href); 
+  const key = 'reveal';
+  let idx = parseInt(url.searchParams.get(key) || '0', 10);
+  
+  if (idx >= schedule.length) { 
+    alert('All weeks revealed!'); 
+    return; 
+  }
+  
+  const rows = document.querySelectorAll('tbody tr');
+  if (rows[idx]) {
+    rows[idx].classList.add('revealed-row');
+    rows[idx].scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+  
+  idx++; 
+  url.searchParams.set(key, String(idx)); 
+  history.replaceState(null, '', url.toString());
+}
+
+function copyShare() { 
+  const link = encodeStateToUrl(); 
+  navigator.clipboard.writeText(link).then(() => {
+    const btn = $('#share');
+    const originalText = btn.innerHTML;
+    btn.innerHTML = '✅ Copied!';
+    setTimeout(() => {
+      btn.innerHTML = originalText;
+    }, 2000);
+  }).catch(() => {
+    alert('Link ready! Copy from address bar.');
+  });
+}
+
+function toCsv() {
+  const participants = nl('#participants');
+  const rows = [['Week', ...participants]];
+  document.querySelectorAll('tbody tr').forEach(tr => {
+    rows.push(Array.from(tr.children).map(td => `"${td.textContent.trim()}"`));
+  });
+  const csv = rows.map(r => r.join(',')).join('\n');
+  const blob = new Blob([csv], { type: 'text/csv' });
+  const a = document.createElement('a'); 
+  a.href = URL.createObjectURL(blob); 
+  a.download = 'FAF-weekly-death-match.csv'; 
+  a.click();
+  
+  // Visual feedback
+  const btn = $('#exportCsv');
+  const originalText = btn.innerHTML;
+  btn.innerHTML = '📊 Downloaded!';
+  setTimeout(() => {
+    btn.innerHTML = originalText;
+  }, 2000);
+}
+
+// ---------- Events ----------
+$('#generate').addEventListener('click', buildSchedule);
+$('#revealOne').addEventListener('click', revealNext);
+$('#share').addEventListener('click', copyShare);
+$('#exportCsv').addEventListener('click', toCsv);
+
+// Update audit tag on input changes
+['#gameName', '#subtitle', '#weeks', '#participants', '#teams', '#seed', '#uniquePerWeek', '#seasonRepeats'].forEach(id => {
+  $(id).addEventListener('change', () => { 
+    $('#hashOut').textContent = 'Audit: ' + inputHash(); 
+    encodeStateToUrl(); 
+  });
+  $(id).addEventListener('input', () => { 
+    $('#hashOut').textContent = 'Audit: ' + inputHash(); 
+  });
+});
+
+// Initialize
+decodeStateFromUrl();
+$('#yr').textContent = new Date().getFullYear();
+$('#hashOut').textContent = 'Audit: ' + inputHash();
+
+// Add some nice keyboard shortcuts
+document.addEventListener('keydown', (e) => {
+  if (e.ctrlKey || e.metaKey) {
+    switch(e.key) {
+      case 'Enter':
+        e.preventDefault();
+        buildSchedule();
+        break;
+      case 'k':
+        e.preventDefault();
+        copyShare();
+        break;
+    }
+  }
+});
+</script>
+</body>
+</html>
