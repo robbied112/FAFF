@@ -1,531 +1,106 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Friends are Friends Forever — Weekly Match</title>
-  <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
-    
-    :root {
-      --bg-primary: #0a0d1a;
-      --bg-secondary: #131829;
-      --bg-tertiary: #1a1f37;
-      --surface: rgba(26, 31, 55, 0.8);
-      --surface-hover: rgba(26, 31, 55, 0.95);
-      --border: rgba(255, 255, 255, 0.08);
-      --border-hover: rgba(255, 255, 255, 0.15);
-      --text-primary: #ffffff;
-      --text-secondary: #a8b3cf;
-      --text-muted: #6b7589;
-      --accent: #3b82f6;
-      --accent-hover: #2563eb;
-      --accent-glow: rgba(59, 130, 246, 0.3);
-      --success: #10b981;
-      --warning: #f59e0b;
-      --danger: #ef4444;
-      --gradient-primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      --gradient-surface: linear-gradient(135deg, rgba(26, 31, 55, 0.9) 0%, rgba(19, 24, 41, 0.9) 100%);
-      --gradient-button: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
-      --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
-      --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.07), 0 2px 4px rgba(0, 0, 0, 0.06);
-      --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1), 0 4px 6px rgba(0, 0, 0, 0.05);
-      --shadow-xl: 0 25px 50px rgba(0, 0, 0, 0.25);
-    }
-
-    * {
-      box-sizing: border-box;
-    }
-
-    html, body {
-      height: 100%;
-      margin: 0;
-      padding: 0;
-    }
-
-    body {
-      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      background: var(--bg-primary);
-      background-image: 
-        radial-gradient(circle at 20% 50%, rgba(59, 130, 246, 0.1) 0%, transparent 50%),
-        radial-gradient(circle at 80% 20%, rgba(139, 92, 246, 0.1) 0%, transparent 50%),
-        radial-gradient(circle at 40% 80%, rgba(236, 72, 153, 0.05) 0%, transparent 50%);
-      color: var(--text-primary);
-      line-height: 1.6;
-      min-height: 100vh;
-      overflow-x: hidden;
-    }
-
-    .container {
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 2rem 1rem;
-    }
-
-    .header-card {
-      background: var(--gradient-surface);
-      backdrop-filter: blur(20px);
-      border: 1px solid var(--border);
-      border-radius: 24px;
-      padding: 2rem;
-      margin-bottom: 2rem;
-      box-shadow: var(--shadow-xl);
-      position: relative;
-      overflow: hidden;
-      animation: slideInUp 0.6s ease-out;
-    }
-
-    .header-card::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      height: 1px;
-      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-    }
-
-    .header-title {
-      font-size: 2.5rem;
-      font-weight: 700;
-      margin: 0 0 0.5rem 0;
-      background: var(--gradient-primary);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-    }
-
-    .header-subtitle {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.75rem;
-      margin-bottom: 1rem;
-    }
-
-    .tag {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.5rem;
-      padding: 0.5rem 1rem;
-      background: rgba(255, 255, 255, 0.05);
-      border: 1px solid var(--border);
-      border-radius: 9999px;
-      font-size: 0.875rem;
-      font-weight: 500;
-      color: var(--text-secondary);
-      backdrop-filter: blur(10px);
-      transition: all 0.2s ease;
-    }
-
-    .tag:hover {
-      border-color: var(--border-hover);
-      background: rgba(255, 255, 255, 0.08);
-    }
-
-    .tag-primary {
-      background: var(--accent-glow);
-      border-color: var(--accent);
-      color: var(--accent);
-    }
-
-    .description {
-      color: var(--text-muted);
-      font-size: 0.9rem;
-      margin: 0;
-      line-height: 1.5;
-    }
-
-    .main-grid {
-      display: grid;
-      gap: 2rem;
-      grid-template-columns: 1fr;
-    }
-
-    @media (min-width: 1024px) {
-      .main-grid {
-        grid-template-columns: 400px 1fr;
-      }
-    }
-
-    .card {
-      background: var(--gradient-surface);
-      backdrop-filter: blur(20px);
-      border: 1px solid var(--border);
-      border-radius: 20px;
-      padding: 1.5rem;
-      box-shadow: var(--shadow-lg);
-      transition: all 0.3s ease;
-      animation: slideInUp 0.6s ease-out;
-      animation-delay: 0.2s;
-      opacity: 0;
-      animation-fill-mode: forwards;
-    }
-
-    .card:hover {
-      border-color: var(--border-hover);
-      transform: translateY(-2px);
-      box-shadow: var(--shadow-xl);
-    }
-
-    .card-title {
-      font-size: 1.25rem;
-      font-weight: 600;
-      margin: 0 0 1.5rem 0;
-      color: var(--text-primary);
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-    }
-
-    .form-group {
-      margin-bottom: 1.5rem;
-    }
-
-    .form-label {
-      display: block;
-      font-size: 0.875rem;
-      font-weight: 500;
-      color: var(--text-secondary);
-      margin-bottom: 0.5rem;
-    }
-
-    .form-input, .form-textarea, .form-select {
-      width: 100%;
-      background: rgba(255, 255, 255, 0.02);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 0.75rem 1rem;
-      color: var(--text-primary);
-      font-size: 0.9rem;
-      transition: all 0.2s ease;
-      backdrop-filter: blur(10px);
-    }
-
-    .form-input:focus, .form-textarea:focus, .form-select:focus {
-      outline: none;
-      border-color: var(--accent);
-      box-shadow: 0 0 0 3px var(--accent-glow);
-      background: rgba(255, 255, 255, 0.05);
-    }
-
-    .form-textarea {
-      min-height: 120px;
-      font-family: 'SF Mono', 'Monaco', 'Menlo', 'Roboto Mono', monospace;
-      font-size: 0.85rem;
-      resize: vertical;
-    }
-
-    .form-grid {
-      display: grid;
-      gap: 1rem;
-      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-    }
-
-    .button-group {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.75rem;
-      align-items: center;
-      margin-top: 1.5rem;
-    }
-
-    .btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.5rem;
-      padding: 0.75rem 1.25rem;
-      font-size: 0.9rem;
-      font-weight: 600;
-      border-radius: 12px;
-      border: 1px solid transparent;
-      cursor: pointer;
-      transition: all 0.2s ease;
-      text-decoration: none;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .btn::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: -100%;
-      width: 100%;
-      height: 100%;
-      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
-      transition: left 0.5s ease;
-    }
-
-    .btn:hover::before {
-      left: 100%;
-    }
-
-    .btn-primary {
-      background: var(--gradient-button);
-      color: white;
-      box-shadow: var(--shadow-md);
-    }
-
-    .btn-primary:hover {
-      transform: translateY(-1px);
-      box-shadow: var(--shadow-lg);
-      filter: brightness(1.05);
-    }
-
-    .btn-secondary {
-      background: rgba(255, 255, 255, 0.05);
-      border-color: var(--border);
-      color: var(--text-primary);
-    }
-
-    .btn-secondary:hover {
-      background: rgba(255, 255, 255, 0.1);
-      border-color: var(--border-hover);
-      transform: translateY(-1px);
-    }
-
-    .btn-ghost {
-      background: transparent;
-      border-color: var(--border);
-      color: var(--text-secondary);
-    }
-
-    .btn-ghost:hover {
-      border-color: var(--accent);
-      color: var(--accent);
-      background: var(--accent-glow);
-    }
-
-    .audit-tag {
-      margin-left: auto;
-      font-family: 'SF Mono', 'Monaco', 'Menlo', 'Roboto Mono', monospace;
-      font-size: 0.8rem;
-      color: var(--text-muted);
-      padding: 0.25rem 0.5rem;
-      background: rgba(255, 255, 255, 0.02);
-      border-radius: 6px;
-      border: 1px solid var(--border);
-    }
-
-    .schedule-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 1.5rem;
-      flex-wrap: wrap;
-      gap: 1rem;
-    }
-
-    .schedule-info {
-      display: flex;
-      align-items: center;
-      gap: 1rem;
-      padding: 0.75rem 1.25rem;
-      background: rgba(59, 130, 246, 0.1);
-      border: 1px solid rgba(59, 130, 246, 0.2);
-      border-radius: 12px;
-    }
-
-    .schedule-title {
-      font-weight: 600;
-      color: var(--accent);
-    }
-
-    .schedule-subtitle {
-      color: var(--text-muted);
-    }
-
-    .table-container {
-      background: rgba(255, 255, 255, 0.02);
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      overflow: hidden;
-      backdrop-filter: blur(10px);
-    }
-
-    .table {
-      width: 100%;
-      border-collapse: collapse;
-    }
-
-    .table th {
-      background: var(--bg-tertiary);
-      padding: 1rem 0.75rem;
-      text-align: left;
-      font-weight: 600;
-      color: var(--text-secondary);
-      font-size: 0.875rem;
-      border-bottom: 1px solid var(--border);
-      position: sticky;
-      top: 0;
-      z-index: 10;
-    }
-
-    .table td {
-      padding: 0.875rem 0.75rem;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.04);
-      color: var(--text-primary);
-      font-size: 0.9rem;
-    }
-
-    .table tbody tr {
-      transition: all 0.2s ease;
-    }
-
-    .table tbody tr:hover {
-      background: rgba(255, 255, 255, 0.02);
-    }
-
-    .week-badge {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      min-width: 2rem;
-      height: 1.5rem;
-      background: var(--accent-glow);
-      color: var(--accent);
-      border-radius: 6px;
-      font-size: 0.8rem;
-      font-weight: 600;
-    }
-
-    .revealed-row {
-      background: rgba(16, 185, 129, 0.1) !important;
-      border-left: 3px solid var(--success);
-    }
-
-    .footer {
-      text-align: center;
-      color: var(--text-muted);
-      font-size: 0.85rem;
-      margin-top: 3rem;
-      padding: 1.5rem;
-      opacity: 0.7;
-    }
-
-    .empty-state {
-      text-align: center;
-      padding: 3rem 1rem;
-      color: var(--text-muted);
-    }
-
-    .empty-state-icon {
-      font-size: 3rem;
-      margin-bottom: 1rem;
-      opacity: 0.5;
-    }
-
-    @keyframes slideInUp {
-      from {
-        opacity: 0;
-        transform: translateY(30px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-
-    @keyframes glow {
-      0%, 100% { box-shadow: 0 0 20px rgba(59, 130, 246, 0.3); }
-      50% { box-shadow: 0 0 30px rgba(59, 130, 246, 0.5); }
-    }
-
-    .generating {
-      animation: glow 2s ease-in-out infinite;
-    }
-
-    /* Mobile responsiveness */
-    @media (max-width: 768px) {
-      .container {
-        padding: 1rem;
-      }
-      
-      .header-card {
-        padding: 1.5rem;
-        text-align: center;
-      }
-      
-      .header-title {
-        font-size: 2rem;
-      }
-      
-      .button-group {
-        flex-direction: column;
-        align-items: stretch;
-      }
-      
-      .btn {
-        justify-content: center;
-      }
-      
-      .schedule-header {
-        flex-direction: column;
-        text-align: center;
-      }
-      
-      .audit-tag {
-        margin-left: 0;
-        margin-top: 0.5rem;
-      }
-    }
-  </style>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Friends are Friends Forever — Weekly Match</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+  :root{
+    --bg-primary:#0a0d1a;--bg-secondary:#131829;--bg-tertiary:#1a1f37;
+    --surface:rgba(26,31,55,.9);--border:rgba(255,255,255,.08);
+    --border-hover:rgba(255,255,255,.15);--text:#fff;--muted:#a8b3cf;
+    --accent:#3b82f6;--accent2:#10b981;--danger:#ef4444;
+    --glow:rgba(59,130,246,.3);
+  }
+  *{box-sizing:border-box}html,body{height:100%;margin:0}
+  body{
+    font-family:Inter,system-ui,Segoe UI,Roboto,sans-serif;background:var(--bg-primary);
+    background-image:
+      radial-gradient(circle at 20% 50%, rgba(59,130,246,.1) 0%, transparent 50%),
+      radial-gradient(circle at 80% 20%, rgba(139,92,246,.1) 0%, transparent 50%),
+      radial-gradient(circle at 40% 80%, rgba(236,72,153,.05) 0%, transparent 50%);
+    color:var(--text); line-height:1.6; min-height:100vh; overflow-x:hidden}
+  .container{max-width:1100px;margin:0 auto;padding:24px 16px}
+  .card{background:var(--surface);
+    border:1px solid var(--border);border-radius:18px;padding:16px 18px;margin-bottom:18px}
+  h1{font-size:36px;margin:6px 0 4px;
+    background:linear-gradient(135deg,#667eea,#764ba2);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+  .tag{display:inline-flex;gap:.5rem;align-items:center;padding:.4rem .8rem;border:1px solid var(--border);
+    border-radius:999px;background:rgba(255,255,255,.05);color:#cfe1ff;font-weight:600}
+  .tag-primary{background:var(--glow);border-color:var(--accent);color:#dbeafe}
+  .row{display:grid;gap:18px}
+  @media(min-width:980px){.row{grid-template-columns:370px 1fr}}
+  label{font-size:.85rem;color:#c7d2fe}
+  input,select,textarea{width:100%;padding:.7rem .9rem;border-radius:12px;border:1px solid var(--border);
+    background:rgba(255,255,255,.02);color:var(--text)}
+  input:focus,select:focus,textarea:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px var(--glow)}
+  .grid{display:grid;gap:12px;grid-template-columns:repeat(2,1fr)}
+  .btn{display:inline-flex;align-items:center;gap:.5rem;padding:.7rem 1rem;border-radius:12px;border:1px solid var(--border);
+    background:rgba(255,255,255,.06);color:#fff;font-weight:700;cursor:pointer}
+  .btn.primary{background:linear-gradient(135deg,#3b82f6,#1d4ed8)}
+  .btn.ghost{background:transparent}
+  .pill{padding:.25rem .5rem;border-radius:8px;border:1px solid var(--border);font-family:ui-monospace,Menlo,monospace;font-size:.8rem;color:#b6c2e2}
+  table{width:100%;border-collapse:collapse}
+  th,td{border-bottom:1px solid rgba(255,255,255,.06);padding:.6rem .4rem;text-align:left}
+  th{color:#a8b3cf;font-weight:700}
+  .ok{color:var(--accent2)}.bad{color:var(--danger)}
+  .flex{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+  .muted{color:#a8b3cf}
+  small.muted{display:block;margin-top:6px}
+</style>
 </head>
 <body>
-  <div class="container">
-    <div class="header-card">
-      <h1 class="header-title">Friends are Friends Forever</h1>
-      <div class="header-subtitle">
-        <div class="tag tag-primary">Weekly Death Match</div>
-        <div class="tag">No backend • Shareable URL • Verifiable randomness</div>
-      </div>
-      <p class="description">Single‑file app. Open locally or host on GitHub Pages/Netlify. Anyone with the link can verify the exact same weekly assignments.</p>
+<div class="container">
+  <!-- Header -->
+  <div class="card">
+    <h1>Friends are Friends Forever</h1>
+    <div class="flex">
+      <span class="tag tag-primary">Weekly Match</span>
+      <span class="pill" id="audit">Audit:</span>
     </div>
+  </div>
 
-    <div class="main-grid">
-      <div class="card">
-        <h2 class="card-title">⚙️ Setup</h2>
-        
-        <div class="form-group">
-          <label class="form-label">Game name</label>
-          <input class="form-input" id="gameName" value="Friends are Friends Forever"/>
-        </div>
-        
-        <div class="form-group">
-          <label class="form-label">Subtitle</label>
-          <input class="form-input" id="subtitle" value="Weekly Death Match"/>
-        </div>
+  <div class="row">
+    <!-- Left: Setup / Controls -->
+    <div class="card">
+      <h3 style="margin-top:6px">⚙️ Setup</h3>
 
-        <div class="form-grid">
-          <div class="form-group">
-            <label class="form-label">Weeks</label>
-            <input class="form-input" id="weeks" type="number" min="1" max="30" value="14"/>
-          </div>
-          <div class="form-group">
-            <label class="form-label">Unique teams per week</label>
-            <select class="form-select" id="uniquePerWeek">
-              <option value="1" selected>Yes (no duplicates)</option>
-              <option value="0">No (duplicates allowed)</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label class="form-label">Season repeats</label>
-            <select class="form-select" id="seasonRepeats">
-              <option value="1" selected>Allowed (simplest)</option>
-              <option value="0">Avoid until all used</option>
-            </select>
-          </div>
+      <div class="grid">
+        <div>
+          <label>Weeks (NFL)</label>
+          <input id="weeks" type="number" min="1" max="30" value="14"/>
         </div>
+        <div>
+          <label>Default Weekly Bet ($)</label>
+          <input id="weeklyBet" type="number" min="0" step="1" value="20"/>
+        </div>
+      </div>
 
-        <div class="form-group">
-          <label class="form-label">Participants (one per line)</label>
-          <textarea class="form-textarea" id="participants">Robbie
+      <div class="grid" style="margin-top:10px">
+        <div>
+          <label>Season start (Week 1 Tuesday)</label>
+          <input id="seasonStart" type="date"/>
+          <small class="muted">Each NFL week runs Tue 00:00 → next Tue 00:00, so Thu/Sun/Mon games are one week.</small>
+        </div>
+        <div>
+          <label>Lock next week until Tuesday</label>
+          <select id="lockUntilTuesday">
+            <option value="1" selected>Yes</option>
+            <option value="0">No</option>
+          </select>
+        </div>
+      </div>
+
+      <div style="margin-top:10px">
+        <label>Participants (one per line)</label>
+        <textarea id="participants" rows="3">Robbie
 Shane</textarea>
-        </div>
+      </div>
 
-        <div class="form-group">
-          <label class="form-label">Teams (one per line)</label>
-          <textarea class="form-textarea" id="teams">Bham Bobs
+      <div style="margin-top:10px">
+        <label>Teams (one per line)</label>
+        <textarea id="teams" rows="6">Bham Bobs
 Sunday Morning Wood
 Naturally Le'Veon'd
 Floatisha's Team
@@ -535,322 +110,432 @@ Ginger Balls
 Pfffffffffft
 Hawk Heaven
 Turbo Team</textarea>
-        </div>
+      </div>
 
-        <div class="form-group">
-          <label class="form-label">Seed (shared so results are reproducible)</label>
-          <input class="form-input" id="seed" placeholder="e.g., 2025‑Season‑Hash"/>
-          <div class="description" style="margin-top: 0.5rem; font-size: 0.8rem;">Anyone can verify the draw: same inputs + seed ⇒ same schedule. Change seed to re‑roll a fresh season.</div>
+      <div class="grid" style="margin-top:10px">
+        <div>
+          <label>Seed (keeps it auditable)</label>
+          <input id="seed" placeholder="e.g. 2025-Season"/>
         </div>
-
-        <div class="button-group">
-          <button class="btn btn-primary" id="generate">🎲 Generate Season</button>
-          <button class="btn btn-secondary" id="revealOne">👁️ Reveal Next Week</button>
-          <button class="btn btn-ghost" id="share">🔗 Share Link</button>
-          <button class="btn btn-ghost" id="exportCsv">📊 Export CSV</button>
-          <span class="audit-tag" id="hashOut">Audit tag</span>
+        <div>
+          <label>Unique teams per week</label>
+          <select id="uniquePerWeek">
+            <option value="1" selected>Yes (no duplicates)</option>
+            <option value="0">No (duplicates allowed)</option>
+          </select>
         </div>
       </div>
 
-      <div class="card">
-        <h2 class="card-title">📅 Schedule</h2>
-        <div id="scheduleWrap" class="empty-state">
-          <div class="empty-state-icon">🎯</div>
-          <p>Click "Generate Season" to create your weekly matchups</p>
-        </div>
+      <div class="flex" style="margin-top:14px">
+        <button class="btn primary" id="revealBtn">🎲 Reveal Current Week</button>
+        <button class="btn" id="settleBtn">✅ Settle Current Week</button>
+        <button class="btn ghost" id="shareBtn">🔗 Share Link</button>
+        <span class="muted">Week <span id="wkNow">1</span> of <span id="wkTotal">14</span></span>
       </div>
     </div>
 
-    <div class="footer">
-      © <span id="yr"></span> FAF Forever. This page uses a deterministic PRNG (Mulberry32) seeded by your seed + week to keep it fair and auditable.
+    <!-- Right: Current Week + Side Bets -->
+    <div class="card">
+      <h3 style="margin-top:6px">📅 Current Week</h3>
+      <div id="currentWrap" class="muted">Click “Reveal Current Week” to draw matchups.</div>
+
+      <hr style="border-color:rgba(255,255,255,.06)">
+
+      <h3>💸 Side Bets (even odds)</h3>
+      <div class="grid">
+        <div>
+          <label>Bettor name</label>
+          <input id="sbName" placeholder="e.g. Sam"/>
+        </div>
+        <div>
+          <label>On</label>
+          <select id="sbOn"></select>
+        </div>
+      </div>
+      <div class="grid" style="margin-top:10px">
+        <div>
+          <label>Amount ($)</label>
+          <input id="sbAmt" type="number" min="1" step="1" value="10"/>
+        </div>
+        <div>
+          <label>&nbsp;</label>
+          <button class="btn" id="addSb">➕ Add Side Bet</button>
+        </div>
+      </div>
+
+      <div style="margin-top:10px">
+        <table id="sbTable" style="display:none">
+          <thead><tr><th>Bettor</th><th>On</th><th>$</th></tr></thead>
+          <tbody></tbody>
+        </table>
+        <div id="sbEmpty" class="muted">No side bets yet.</div>
+      </div>
     </div>
   </div>
 
+  <!-- History -->
+  <div class="card">
+    <h3 style="margin-top:6px">📜 History & Totals</h3>
+    <div class="muted" style="margin-bottom:8px">Winner gets all weekly stakes from opponents (e.g., with 2 players at $20, winner +$20, loser −$20). Side bets pay 1:1.</div>
+    <div id="historyWrap" class="muted">Nothing yet. Settle Week 1 to start the ledger.</div>
+    <hr style="border-color:rgba(255,255,255,.06)">
+    <div id="totalsWrap"></div>
+  </div>
+
+  <div class="muted" style="text-align:center;padding:10px 0">© <span id="yr"></span> FAF Forever — deterministic draws (seeded), localStorage for state.</div>
+</div>
+
 <script>
-// ---------- Utilities ----------
-const $ = (q) => document.querySelector(q);
-const nl = (id) => $(id).value.split(/\n+/).map(s => s.trim()).filter(Boolean);
+// ---------- Helpers ----------
+const $ = q => document.querySelector(q);
+const nl = el => el.value.split(/\n+/).map(s=>s.trim()).filter(Boolean);
 
-function cyrb128(str) {
-  let h1 = 1779033703, h2 = 3144134277, h3 = 1013904242, h4 = 2773480762;
-  for (let i = 0; i < str.length; i++) {
-    let k = str.charCodeAt(i);
-    h1 = h2 ^ Math.imul(h1 ^ k, 597399067);
-    h2 = h3 ^ Math.imul(h2 ^ k, 2869860233);
-    h3 = h4 ^ Math.imul(h3 ^ k, 951274213);
-    h4 = h1 ^ Math.imul(h4 ^ k, 2716044179);
+// Deterministic PRNG
+function cyrb128(str){let h1=1779033703,h2=3144134277,h3=1013904242,h4=2773480762;
+  for(let i=0;i<str.length;i++){let k=str.charCodeAt(i);
+    h1=h2^Math.imul(h1^k,597399067);h2=h3^Math.imul(h2^k,2869860233);
+    h3=h4^Math.imul(h3^k,951274213);h4=h1^Math.imul(h4^k,2716044179);}
+  h1=Math.imul(h3^(h1>>>18),597399067);h2=Math.imul(h4^(h2>>>22),2869860233);
+  h3=Math.imul(h1^(h3>>>17),951274213);h4=Math.imul(h2^(h4>>>19),2716044179);
+  return[(h1^h2^h3^h4)>>>0,(h2^h1)>>>0,(h3^h1)>>>0,(h4^h1)>>>0];}
+function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);
+  t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+function rngFrom(seed){const [h]=cyrb128(seed);return mulberry32(h)}
+function hashAudit(s){return cyrb128(s).at(0).toString(16).slice(0,8).toUpperCase()}
+
+// ---------- State ----------
+const STATE_KEY = "FAF_WEEKLY_STATE_V3";
+let state = {
+  weeks: 14,
+  currentWeek: 1,
+  participants: ["Robbie","Shane"],
+  teams: [],
+  seed: "",
+  uniquePerWeek: true,
+  defaultBet: 20,
+  perWeekBet: {},               // {week:number}
+  schedule: {},                 // {week:{picks:{[name]:team}}}
+  results: {},                  // {week:{winner,bet}}
+  sideBets: {},                 // {week:[{name,on,amt,win?}]}
+  totals: {},                   // {[participant]: number}
+  bettorTotals: {},             // {[bettor]: number}
+  // NFL calendar options
+  seasonStart: "",              // "YYYY-MM-DD" for Week 1 Tuesday
+  lockUntilTuesday: true
+};
+
+// ---------- Persistence ----------
+function save(){ localStorage.setItem(STATE_KEY, JSON.stringify(state)); }
+function load(){
+  const raw = localStorage.getItem(STATE_KEY);
+  if(!raw) return;
+  try{ state = {...state, ...JSON.parse(raw)}; }catch{}
+}
+load();
+
+// ---------- Calendar week helpers ----------
+const DAY = 24*60*60*1000;
+function weekNumberFromToday() {
+  if (!state.seasonStart) return state.currentWeek;
+  const start = new Date(state.seasonStart + "T00:00:00");
+  const today = new Date();
+  const diffDays = Math.floor((today - start) / DAY);
+  return Math.max(1, Math.min(state.weeks, 1 + Math.floor(diffDays / 7)));
+}
+function weekStartDate(week){
+  const start = new Date(state.seasonStart + "T00:00:00");
+  return new Date(start.getTime() + (week-1)*7*DAY); // Tue 00:00
+}
+function weekEndDate(week){
+  const ws = weekStartDate(week);
+  return new Date(ws.getTime() + 7*DAY); // next Tue 00:00
+}
+function isWithinCurrentWeekWindow(week){
+  if (!state.seasonStart) return true;
+  const now = new Date();
+  return now >= weekStartDate(week) && now < weekEndDate(week);
+}
+function hasWeekClosed(week){
+  if (!state.seasonStart) return true;
+  const now = new Date();
+  return now >= weekEndDate(week); // next Tue
+}
+function fmtDate(d){ return d.toLocaleDateString(undefined,{month:'short',day:'numeric'}); }
+
+// ---------- UI init ----------
+function initUI(){
+  $('#weeks').value = state.weeks;
+  $('#wkTotal').textContent = state.weeks;
+  // auto-sync currentWeek if seasonStart exists
+  if (state.seasonStart) state.currentWeek = weekNumberFromToday();
+  $('#wkNow').textContent = state.currentWeek;
+  $('#weeklyBet').value = state.defaultBet;
+  $('#participants').value = state.participants.join("\n");
+  if(state.teams.length){ $('#teams').value = state.teams.join("\n"); }
+  $('#seed').value = state.seed;
+  $('#uniquePerWeek').value = state.uniquePerWeek ? "1":"0";
+  $('#seasonStart').value = state.seasonStart || "";
+  $('#lockUntilTuesday').value = state.lockUntilTuesday ? "1" : "0";
+  $('#yr').textContent = new Date().getFullYear();
+  $('#audit').textContent = "Audit: " + hashAudit(serializeForAudit());
+  // side-bet participant dropdown
+  const sel = $('#sbOn'); sel.innerHTML = "";
+  state.participants.forEach(p=>{
+    const o=document.createElement('option'); o.value=p; o.textContent=p; sel.appendChild(o);
+  });
+  renderCurrentWeek();
+  renderHistory();
+  renderTotals();
+}
+function serializeForAudit(){
+  return [
+    state.weeks,state.participants.join('|'),state.teams.join('|'),
+    state.seed,state.uniquePerWeek?1:0,state.currentWeek,state.seasonStart||"",state.lockUntilTuesday?1:0
+  ].join('|');
+}
+
+// ---------- Event wiring ----------
+['#weeks','#weeklyBet','#participants','#teams','#seed','#uniquePerWeek',
+ '#seasonStart','#lockUntilTuesday'
+].forEach(id=>{
+  $(id).addEventListener('change', ()=> {
+    state.weeks = Math.max(1, Math.min(30, parseInt($('#weeks').value||"14",10)));
+    state.defaultBet = Math.max(0, parseFloat($('#weeklyBet').value||"0"));
+    state.participants = nl($('#participants'));
+    state.teams = nl($('#teams'));
+    state.seed = $('#seed').value.trim();
+    state.uniquePerWeek = $('#uniquePerWeek').value==="1";
+    state.seasonStart = $('#seasonStart').value || "";
+    state.lockUntilTuesday = $('#lockUntilTuesday').value==="1";
+    if (state.seasonStart) state.currentWeek = weekNumberFromToday();
+    $('#wkTotal').textContent = state.weeks;
+    $('#wkNow').textContent = state.currentWeek;
+    $('#audit').textContent = "Audit: " + hashAudit(serializeForAudit());
+    save(); initUI();
+  });
+});
+
+$('#shareBtn').addEventListener('click', ()=>{
+  const sharable = btoa(unescape(encodeURIComponent(JSON.stringify(state))));
+  const url = new URL(location.href); url.searchParams.set('state', sharable);
+  history.replaceState(null,'',url.toString());
+  navigator.clipboard.writeText(url.toString()).then(()=>{
+    $('#shareBtn').textContent="✅ Copied"; setTimeout(()=>$('#shareBtn').textContent="🔗 Share Link",1500);
+  });
+});
+
+(function decodeFromUrl(){
+  const sp=new URLSearchParams(location.search).get('state');
+  if(!sp) return;
+  try{
+    const incoming=JSON.parse(decodeURIComponent(escape(atob(sp))));
+    state = {...state, ...incoming};
+    save();
+  }catch{}
+})();
+
+// ---------- Draw / Reveal ----------
+function drawWeek(week){
+  const seed = (state.seed||"FAF") + "::W" + week;
+  const rnd = rngFrom(seed);
+  const picks = {};
+  const taken = new Set();
+  const teams = state.teams.slice();
+  if(teams.length < state.participants.length){ alert("Need ≥ teams than participants."); return null; }
+  state.participants.forEach(p=>{
+    let pool = teams.slice();
+    if(state.uniquePerWeek){ pool = pool.filter(t=>!taken.has(t)); }
+    const team = pool[Math.floor(rnd()*pool.length)];
+    picks[p] = team; taken.add(team);
+  });
+  return {week, picks};
+}
+
+function canRevealCurrent(){
+  const w = state.currentWeek;
+  const prevOk = (w===1) || (state.results[w-1]);
+  const notDrawn = !state.schedule[w];
+  const inWindow = isWithinCurrentWeekWindow(w);
+  return prevOk && notDrawn && inWindow;
+}
+
+$('#revealBtn').addEventListener('click', ()=>{
+  const w = state.currentWeek;
+  if(!isWithinCurrentWeekWindow(w) && state.seasonStart){
+    const ws = weekStartDate(w), we = weekEndDate(w);
+    alert(`Week ${w} can be revealed only between ${fmtDate(ws)} and ${fmtDate(new Date(we.getTime()-1))}.`);
+    return;
   }
-  h1 = Math.imul(h3 ^ (h1 >>> 18), 597399067);
-  h2 = Math.imul(h4 ^ (h2 >>> 22), 2869860233);
-  h3 = Math.imul(h1 ^ (h3 >>> 17), 951274213);
-  h4 = Math.imul(h2 ^ (h4 >>> 19), 2716044179);
-  return [(h1 ^ h2 ^ h3 ^ h4) >>> 0, (h2 ^ h1) >>> 0, (h3 ^ h1) >>> 0, (h4 ^ h1) >>> 0];
-}
-
-function mulberry32(a) {
-  return function() {
-    a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a);
-    t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296;
+  if(!canRevealCurrent()){
+    if (state.schedule[w]) { alert("This week is already revealed. Settle it to advance."); }
+    else { alert("Finish the previous week first."); }
+    return;
   }
-}
+  const sched = drawWeek(w);
+  if(!sched) return;
+  state.schedule[w] = sched;
+  save(); renderCurrentWeek();
+});
 
-function seededRng(seedStr) { const [h] = cyrb128(seedStr); return mulberry32(h); }
+$('#settleBtn').addEventListener('click', ()=>{
+  const w = state.currentWeek;
+  const sched = state.schedule[w];
+  if(!sched){ alert("Reveal the week first."); return; }
+  const winner = prompt("Who won this week? Enter exact name:\n" + state.participants.join(", "));
+  if(!winner || !state.participants.includes(winner.trim())){ alert("Pick a valid participant."); return; }
+  const bet = state.perWeekBet[w] ?? state.defaultBet;
 
-function shuffle(arr, rnd) {
-  const a = arr.slice(); 
-  for (let i = a.length - 1; i > 0; i--) { 
-    const j = Math.floor(rnd() * (i + 1)); 
-    [a[i], a[j]] = [a[j], a[i]]; 
-  } 
-  return a; 
-}
+  // update participant totals
+  const losers = state.participants.filter(p=>p!==winner);
+  const pot = losers.length * bet;
+  state.participants.forEach(p=>{ if(!(p in state.totals)) state.totals[p]=0; });
+  state.totals[winner] += pot;
+  losers.forEach(l=> state.totals[l] -= bet);
 
-function encodeStateToUrl() {
-  const state = {
-    g: $('#gameName').value, s: $('#subtitle').value, w: $('#weeks').value,
-    u: $('#uniquePerWeek').value, r: $('#seasonRepeats').value,
-    p: nl('#participants'), t: nl('#teams'), d: $('#seed').value
-  };
-  const url = new URL(location.href);
-  url.searchParams.set('state', btoa(unescape(encodeURIComponent(JSON.stringify(state)))));
-  history.replaceState(null, '', url.toString());
-  return url.toString();
-}
+  // settle side bets (even odds)
+  const sbs = state.sideBets[w]||[];
+  sbs.forEach(b=>{
+    state.bettorTotals[b.name] = state.bettorTotals[b.name]||0;
+    if(b.on===winner){ state.bettorTotals[b.name] += b.amt; b.win=true; }
+    else{ state.bettorTotals[b.name] -= b.amt; b.win=false; }
+  });
 
-function decodeStateFromUrl() {
-  const sp = new URLSearchParams(location.search).get('state');
-  if (!sp) return;
-  try {
-    const state = JSON.parse(decodeURIComponent(escape(atob(sp))));
-    $('#gameName').value = state.g || $('#gameName').value;
-    $('#subtitle').value = state.s || $('#subtitle').value;
-    $('#weeks').value = state.w || $('#weeks').value;
-    $('#uniquePerWeek').value = state.u || '1';
-    $('#seasonRepeats').value = state.r || '1';
-    $('#seed').value = state.d || '';
-    if (state.p) $('#participants').value = state.p.join('\n');
-    if (state.t) $('#teams').value = state.t.join('\n');
-  } catch (e) { 
-    console.warn('bad state in URL'); 
+  state.results[w] = {winner, bet};
+
+  if (state.lockUntilTuesday && state.seasonStart && !hasWeekClosed(w)) {
+    alert("Locked until next Tuesday: Week " + (w+1) + " won’t reveal until the current NFL week closes.");
   }
+
+  // advance week if more weeks remain
+  if(state.currentWeek < state.weeks){ state.currentWeek += 1; }
+  save();
+  $('#wkNow').textContent = state.currentWeek;
+  renderHistory(); renderTotals(); renderCurrentWeek();
+});
+
+// ---------- Side bets ----------
+$('#addSb').addEventListener('click', ()=>{
+  const w = state.currentWeek;
+  const sched = state.schedule[w];
+  if(!sched){ alert("Reveal the week first."); return; }
+  const name = $('#sbName').value.trim();
+  const on = $('#sbOn').value;
+  const amt = Math.max(1, parseInt($('#sbAmt').value||"1",10));
+  if(!name){ alert("Enter bettor name."); return; }
+  state.sideBets[w] = state.sideBets[w] || [];
+  state.sideBets[w].push({name,on,amt});
+  $('#sbName').value=""; $('#sbAmt').value="10";
+  save(); renderSideBets();
+});
+
+function renderSideBets(){
+  const w = state.currentWeek;
+  const list = state.sideBets[w]||[];
+  const tbl = $('#sbTable'); const tbody = tbl.querySelector('tbody'); tbody.innerHTML="";
+  if(!list.length){ tbl.style.display="none"; $('#sbEmpty').style.display="block"; return; }
+  $('#sbEmpty').style.display="none"; tbl.style.display="table";
+  list.forEach(b=>{
+    const tr=document.createElement('tr');
+    tr.innerHTML = `<td>${b.name}</td><td>${b.on}</td><td>$${b.amt}</td>`;
+    tbody.appendChild(tr);
+  });
 }
 
-function inputHash() {
-  const raw = [$('#gameName').value, $('#subtitle').value, $('#weeks').value, $('#uniquePerWeek').value, $('#seasonRepeats').value, $('#participants').value, $('#teams').value, $('#seed').value].join('|');
-  return cyrb128(raw)[0].toString(16).slice(0, 8).toUpperCase();
-}
+// ---------- Renderers ----------
+function renderCurrentWeek(){
+  const w = state.currentWeek;
+  const wrap = $('#currentWrap');
+  const sched = state.schedule[w];
+  const bet = state.perWeekBet[w] ?? state.defaultBet;
 
-function buildSchedule() {
-  const generateBtn = $('#generate');
-  generateBtn.classList.add('generating');
-  generateBtn.textContent = '🎲 Generating...';
-  
-  setTimeout(() => {
-    const gameName = $('#gameName').value.trim();
-    const subtitle = $('#subtitle').value.trim();
-    const weeks = Math.max(1, Math.min(30, parseInt($('#weeks').value || '14', 10)));
-    const participants = nl('#participants');
-    const teams = nl('#teams');
-    const seed = $('#seed').value.trim() || 'FAF-' + new Date().toISOString().slice(0, 10);
-    const uniquePerWeek = $('#uniquePerWeek').value === '1';
-    const seasonRepeats = $('#seasonRepeats').value === '1';
-    
-    if (participants.length < 2) { 
-      alert('Add at least two participants.'); 
-      generateBtn.classList.remove('generating');
-      generateBtn.textContent = '🎲 Generate Season';
-      return; 
+  if(!sched){
+    if (state.seasonStart) {
+      const ws = weekStartDate(w), we = weekEndDate(w);
+      wrap.innerHTML = `<div class="muted">Week ${w} (${fmtDate(ws)} → ${fmtDate(new Date(we.getTime()-1))}) is not drawn yet. Click <b>Reveal Current Week</b> during this window.</div>`;
+    } else {
+      wrap.innerHTML = `<div class="muted">Week ${w} is not drawn yet. Click <b>Reveal Current Week</b>.</div>`;
     }
-    if (teams.length < participants.length) { 
-      alert('Need ≥ as many teams as participants.'); 
-      generateBtn.classList.remove('generating');
-      generateBtn.textContent = '🎲 Generate Season';
-      return; 
-    }
+    renderSideBets();
+    $('#audit').textContent = "Audit: " + hashAudit(serializeForAudit());
+    return;
+  }
 
-    const out = [];
-    const usedByParticipant = Object.fromEntries(participants.map(p => [p, new Set()]));
+  const rows = state.participants.map(p=>`<tr><td>${p}</td><td>${sched.picks[p]}</td><td>$${bet}</td></tr>`).join('');
+  let weekWindow = '';
+  if (state.seasonStart) {
+    const ws = weekStartDate(w), we = weekEndDate(w);
+    weekWindow = ` • ${fmtDate(ws)} → ${fmtDate(new Date(we.getTime()-1))}`;
+  }
 
-    for (let w = 1; w <= weeks; w++) {
-      const rng = seededRng(`${seed}::week${w}`);
-      let pool = teams.slice();
-
-      const picks = {};
-      for (const p of participants) {
-        let available = pool.slice();
-        if (!seasonRepeats) {
-          const avoid = usedByParticipant[p];
-          const filtered = available.filter(t => !avoid.has(t));
-          if (filtered.length > 0) available = filtered;
-        }
-        
-        if (uniquePerWeek) {
-          const idx = Math.floor(rng() * available.length);
-          const team = available[idx];
-          picks[p] = team;
-          pool = pool.filter(t => t !== team);
-        } else {
-          const idx = Math.floor(rng() * available.length);
-          picks[p] = available[idx];
-        }
-        usedByParticipant[p].add(picks[p]);
-      }
-      out.push({ week: w, picks });
-    }
-
-    // Render with animation
-    const sched = document.createElement('div');
-    
-    const hdr = document.createElement('div');
-    hdr.className = 'schedule-header';
-    hdr.innerHTML = `
-      <div class="schedule-info">
-        <div class="schedule-title">${gameName}</div>
-        <div class="schedule-subtitle">• ${subtitle}</div>
+  wrap.innerHTML = `
+    <div class="flex" style="justify-content:space-between;flex-wrap:wrap">
+      <div><b>Week ${w}</b><span class="muted">${weekWindow}</span></div>
+      <div class="muted">seeded draw • <span class="pill">${hashAudit(JSON.stringify(sched))}</span></div>
+    </div>
+    <table style="margin-top:6px">
+      <thead><tr><th>Participant</th><th>Team</th><th>Stake</th></tr></thead>
+      <tbody>${rows}</tbody>
+    </table>
+    <div class="grid" style="margin-top:10px">
+      <div>
+        <label>Override bet for Week ${w} ($)</label>
+        <input id="betOverride" type="number" min="0" step="1" value="${bet}">
       </div>
-      <div class="audit-tag">Audit: ${inputHash()}</div>
-    `;
-    sched.appendChild(hdr);
-
-    const tableContainer = document.createElement('div');
-    tableContainer.className = 'table-container';
-    
-    const table = document.createElement('table');
-    table.className = 'table';
-    
-    const thead = document.createElement('thead');
-    const thRow = document.createElement('tr');
-    thRow.innerHTML = '<th>Week</th>' + participants.map(p => `<th>${p}</th>`).join('');
-    thead.appendChild(thRow); 
-    table.appendChild(thead);
-    
-    const tbody = document.createElement('tbody');
-    out.forEach((row, index) => {
-      const tr = document.createElement('tr');
-      tr.innerHTML = `<td><span class="week-badge">${row.week}</span></td>` + 
-                     participants.map(p => `<td>${row.picks[p]}</td>`).join('');
-      tbody.appendChild(tr);
-      
-      // Stagger row animations
-      setTimeout(() => {
-        tr.style.animation = 'slideInUp 0.3s ease-out forwards';
-      }, index * 50);
-    });
-    table.appendChild(tbody);
-    tableContainer.appendChild(table);
-    sched.appendChild(tableContainer);
-
-    const wrap = $('#scheduleWrap');
-    wrap.innerHTML = '';
-    wrap.appendChild(sched);
-
-    $('#hashOut').textContent = 'Audit: ' + inputHash();
-    encodeStateToUrl();
-    
-    generateBtn.classList.remove('generating');
-    generateBtn.textContent = '🎲 Generate Season';
-    
-    return out;
-  }, 100);
+      <div>
+        <label>&nbsp;</label>
+        <button class="btn" id="saveBet">💾 Save Bet</button>
+      </div>
+    </div>
+  `;
+  $('#saveBet').addEventListener('click', ()=>{
+    const v=Math.max(0,parseFloat($('#betOverride').value||"0"));
+    state.perWeekBet[w]=v; save(); renderCurrentWeek();
+  });
+  renderSideBets();
+  $('#audit').textContent = "Audit: " + hashAudit(serializeForAudit());
 }
 
-function revealNext() {
-  const schedule = buildSchedule();
-  if (!schedule) return;
-  
-  const url = new URL(location.href); 
-  const key = 'reveal';
-  let idx = parseInt(url.searchParams.get(key) || '0', 10);
-  
-  if (idx >= schedule.length) { 
-    alert('All weeks revealed!'); 
-    return; 
-  }
-  
-  const rows = document.querySelectorAll('tbody tr');
-  if (rows[idx]) {
-    rows[idx].classList.add('revealed-row');
-    rows[idx].scrollIntoView({ behavior: 'smooth', block: 'center' });
-  }
-  
-  idx++; 
-  url.searchParams.set(key, String(idx)); 
-  history.replaceState(null, '', url.toString());
+function renderHistory(){
+  const wrap = $('#historyWrap');
+  const weeksDone = Object.keys(state.results).map(n=>parseInt(n,10)).sort((a,b)=>a-b);
+  if(!weeksDone.length){ wrap.textContent="Nothing yet. Settle Week 1 to start the ledger."; return; }
+  const head = `<thead><tr><th>Week</th>${state.participants.map(p=>`<th>${p}</th>`).join('')}<th>Bet</th><th>Winner</th><th>Side bets: +/−</th></tr></thead>`;
+  const body = weeksDone.map(w=>{
+    const picks = state.schedule[w]?.picks||{};
+    const bet = state.results[w]?.bet ?? state.defaultBet;
+    const winner = state.results[w]?.winner ?? "";
+    const sbs = (state.sideBets[w]||[]);
+    const sbNet = sbs.reduce((acc,b)=> acc + (b.win ? b.amt : -b.amt), 0);
+    const cells = state.participants.map(p=>`<td>${picks[p]||''}</td>`).join('');
+    const sbClass = sbNet>=0?'ok':'bad';
+    return `<tr>
+      <td>${w}</td>${cells}<td>$${bet}</td><td>${winner}</td><td class="${sbClass}">$${sbNet||0}</td>
+    </tr>`;
+  }).join('');
+  wrap.innerHTML = `<div style="overflow:auto"><table>${head}<tbody>${body}</tbody></table></div>`;
 }
 
-function copyShare() { 
-  const link = encodeStateToUrl(); 
-  navigator.clipboard.writeText(link).then(() => {
-    const btn = $('#share');
-    const originalText = btn.innerHTML;
-    btn.innerHTML = '✅ Copied!';
-    setTimeout(() => {
-      btn.innerHTML = originalText;
-    }, 2000);
-  }).catch(() => {
-    alert('Link ready! Copy from address bar.');
-  });
+function renderTotals(){
+  const wrap = $('#totalsWrap');
+  const pTotals = state.participants.map(p=>`<div>${p}: <b>${state.totals[p]? (state.totals[p]>=0?'+':'') + '$'+state.totals[p] : '$0'}</b></div>`).join('');
+  const bettors = Object.keys(state.bettorTotals).sort();
+  const bTotals = bettors.length ? bettors.map(n=>`<div>${n}: <b>${state.bettorTotals[n]>=0?'+':''}$${state.bettorTotals[n]}</b></div>`).join('') : '<div class="muted">No side-bettor totals yet.</div>';
+  wrap.innerHTML = `
+    <div class="row" style="grid-template-columns:1fr 1fr">
+      <div>
+        <h4 style="margin:6px 0">Participants totals</h4>
+        ${pTotals||'<div class="muted">No results yet.</div>'}
+      </div>
+      <div>
+        <h4 style="margin:6px 0">Side-bettor totals</h4>
+        ${bTotals}
+      </div>
+    </div>
+  `;
 }
 
-function toCsv() {
-  const participants = nl('#participants');
-  const rows = [['Week', ...participants]];
-  document.querySelectorAll('tbody tr').forEach(tr => {
-    rows.push(Array.from(tr.children).map(td => `"${td.textContent.trim()}"`));
-  });
-  const csv = rows.map(r => r.join(',')).join('\n');
-  const blob = new Blob([csv], { type: 'text/csv' });
-  const a = document.createElement('a'); 
-  a.href = URL.createObjectURL(blob); 
-  a.download = 'FAF-weekly-death-match.csv'; 
-  a.click();
-  
-  // Visual feedback
-  const btn = $('#exportCsv');
-  const originalText = btn.innerHTML;
-  btn.innerHTML = '📊 Downloaded!';
-  setTimeout(() => {
-    btn.innerHTML = originalText;
-  }, 2000);
-}
-
-// ---------- Events ----------
-$('#generate').addEventListener('click', buildSchedule);
-$('#revealOne').addEventListener('click', revealNext);
-$('#share').addEventListener('click', copyShare);
-$('#exportCsv').addEventListener('click', toCsv);
-
-// Update audit tag on input changes
-['#gameName', '#subtitle', '#weeks', '#participants', '#teams', '#seed', '#uniquePerWeek', '#seasonRepeats'].forEach(id => {
-  $(id).addEventListener('change', () => { 
-    $('#hashOut').textContent = 'Audit: ' + inputHash(); 
-    encodeStateToUrl(); 
-  });
-  $(id).addEventListener('input', () => { 
-    $('#hashOut').textContent = 'Audit: ' + inputHash(); 
-  });
-});
-
-// Initialize
-decodeStateFromUrl();
-$('#yr').textContent = new Date().getFullYear();
-$('#hashOut').textContent = 'Audit: ' + inputHash();
-
-// Add some nice keyboard shortcuts
-document.addEventListener('keydown', (e) => {
-  if (e.ctrlKey || e.metaKey) {
-    switch(e.key) {
-      case 'Enter':
-        e.preventDefault();
-        buildSchedule();
-        break;
-      case 'k':
-        e.preventDefault();
-        copyShare();
-        break;
-    }
-  }
-});
+// boot
+initUI();
 </script>
 </body>
 </html>
