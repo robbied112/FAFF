@@ -30,7 +30,7 @@
     border-radius:999px;background:rgba(255,255,255,.05);color:#cfe1ff;font-weight:600}
   .tag-primary{background:var(--glow);border-color:var(--accent);color:#dbeafe}
   .row{display:grid;gap:18px}
-  @media(min-width:980px){.row{grid-template-columns:370px 1fr}}
+  @media(min-width:980px){.row{grid-template-columns:420px 1fr}}
   label{font-size:.85rem;color:#c7d2fe}
   input,select,textarea{width:100%;padding:.7rem .9rem;border-radius:12px;border:1px solid var(--border);
     background:rgba(255,255,255,.02);color:var(--text)}
@@ -39,15 +39,12 @@
   .btn{display:inline-flex;align-items:center;gap:.5rem;padding:.7rem 1rem;border-radius:12px;border:1px solid var(--border);
     background:rgba(255,255,255,.06);color:#fff;font-weight:700;cursor:pointer}
   .btn.primary{background:linear-gradient(135deg,#3b82f6,#1d4ed8)}
-  .btn.ghost{background:transparent}
   .pill{padding:.25rem .5rem;border-radius:8px;border:1px solid var(--border);font-family:ui-monospace,Menlo,monospace;font-size:.8rem;color:#b6c2e2}
   table{width:100%;border-collapse:collapse}
   th,td{border-bottom:1px solid rgba(255,255,255,.06);padding:.6rem .4rem;text-align:left}
   th{color:#a8b3cf;font-weight:700}
-  .ok{color:var(--accent2)}.bad{color:var(--danger)}
   .flex{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
   .muted{color:#a8b3cf}
-  small.muted{display:block;margin-top:6px}
 </style>
 </head>
 <body>
@@ -81,7 +78,7 @@
         <div>
           <label>Season start (Week 1 Tuesday)</label>
           <input id="seasonStart" type="date"/>
-          <small class="muted">Each NFL week runs Tue 00:00 → next Tue 00:00, so Thu/Sun/Mon games are one week.</small>
+          <div class="muted" style="font-size:.85rem;margin-top:6px">Each NFL week runs Tue 00:00 → next Tue 00:00, so Thu/Sun/Mon games are one week.</div>
         </div>
         <div>
           <label>Lock next week until Tuesday</label>
@@ -129,54 +126,22 @@ Turbo Team</textarea>
       <div class="flex" style="margin-top:14px">
         <button class="btn primary" id="revealBtn">🎲 Reveal Current Week</button>
         <button class="btn" id="settleBtn">✅ Settle Current Week</button>
-        <button class="btn ghost" id="shareBtn">🔗 Share Link</button>
+        <button class="btn" id="shareBtn">🔗 Share Link</button>
         <span class="muted">Week <span id="wkNow">1</span> of <span id="wkTotal">14</span></span>
       </div>
     </div>
 
-    <!-- Right: Current Week + Side Bets -->
+    <!-- Right: Current Week -->
     <div class="card">
       <h3 style="margin-top:6px">📅 Current Week</h3>
       <div id="currentWrap" class="muted">Click “Reveal Current Week” to draw matchups.</div>
-
-      <hr style="border-color:rgba(255,255,255,.06)">
-
-      <h3>💸 Side Bets (even odds)</h3>
-      <div class="grid">
-        <div>
-          <label>Bettor name</label>
-          <input id="sbName" placeholder="e.g. Sam"/>
-        </div>
-        <div>
-          <label>On</label>
-          <select id="sbOn"></select>
-        </div>
-      </div>
-      <div class="grid" style="margin-top:10px">
-        <div>
-          <label>Amount ($)</label>
-          <input id="sbAmt" type="number" min="1" step="1" value="10"/>
-        </div>
-        <div>
-          <label>&nbsp;</label>
-          <button class="btn" id="addSb">➕ Add Side Bet</button>
-        </div>
-      </div>
-
-      <div style="margin-top:10px">
-        <table id="sbTable" style="display:none">
-          <thead><tr><th>Bettor</th><th>On</th><th>$</th></tr></thead>
-          <tbody></tbody>
-        </table>
-        <div id="sbEmpty" class="muted">No side bets yet.</div>
-      </div>
     </div>
   </div>
 
   <!-- History -->
   <div class="card">
     <h3 style="margin-top:6px">📜 History & Totals</h3>
-    <div class="muted" style="margin-bottom:8px">Winner gets all weekly stakes from opponents (e.g., with 2 players at $20, winner +$20, loser −$20). Side bets pay 1:1.</div>
+    <div class="muted" style="margin-bottom:8px">Winner gets all weekly stakes from opponents (e.g., with 2 players at $20, winner +$20, loser −$20).</div>
     <div id="historyWrap" class="muted">Nothing yet. Settle Week 1 to start the ledger.</div>
     <hr style="border-color:rgba(255,255,255,.06)">
     <div id="totalsWrap"></div>
@@ -189,8 +154,6 @@ Turbo Team</textarea>
 // ---------- Helpers ----------
 const $ = q => document.querySelector(q);
 const nl = el => el.value.split(/\n+/).map(s=>s.trim()).filter(Boolean);
-
-// Deterministic PRNG
 function cyrb128(str){let h1=1779033703,h2=3144134277,h3=1013904242,h4=2773480762;
   for(let i=0;i<str.length;i++){let k=str.charCodeAt(i);
     h1=h2^Math.imul(h1^k,597399067);h2=h3^Math.imul(h2^k,2869860233);
@@ -204,7 +167,7 @@ function rngFrom(seed){const [h]=cyrb128(seed);return mulberry32(h)}
 function hashAudit(s){return cyrb128(s).at(0).toString(16).slice(0,8).toUpperCase()}
 
 // ---------- State ----------
-const STATE_KEY = "FAF_WEEKLY_STATE_V3";
+const STATE_KEY = "FAF_WEEKLY_STATE_V4";
 let state = {
   weeks: 14,
   currentWeek: 1,
@@ -216,24 +179,17 @@ let state = {
   perWeekBet: {},               // {week:number}
   schedule: {},                 // {week:{picks:{[name]:team}}}
   results: {},                  // {week:{winner,bet}}
-  sideBets: {},                 // {week:[{name,on,amt,win?}]}
   totals: {},                   // {[participant]: number}
-  bettorTotals: {},             // {[bettor]: number}
-  // NFL calendar options
-  seasonStart: "",              // "YYYY-MM-DD" for Week 1 Tuesday
+  seasonStart: "",              // "YYYY-MM-DD" (Week 1 Tuesday)
   lockUntilTuesday: true
 };
 
 // ---------- Persistence ----------
 function save(){ localStorage.setItem(STATE_KEY, JSON.stringify(state)); }
-function load(){
-  const raw = localStorage.getItem(STATE_KEY);
-  if(!raw) return;
-  try{ state = {...state, ...JSON.parse(raw)}; }catch{}
-}
+function load(){ const raw=localStorage.getItem(STATE_KEY); if(raw){ try{ state={...state,...JSON.parse(raw)} }catch{} } }
 load();
 
-// ---------- Calendar week helpers ----------
+// ---------- Calendar helpers ----------
 const DAY = 24*60*60*1000;
 function weekNumberFromToday() {
   if (!state.seasonStart) return state.currentWeek;
@@ -244,29 +200,20 @@ function weekNumberFromToday() {
 }
 function weekStartDate(week){
   const start = new Date(state.seasonStart + "T00:00:00");
-  return new Date(start.getTime() + (week-1)*7*DAY); // Tue 00:00
+  return new Date(start.getTime() + (week-1)*7*DAY);
 }
-function weekEndDate(week){
-  const ws = weekStartDate(week);
-  return new Date(ws.getTime() + 7*DAY); // next Tue 00:00
-}
+function weekEndDate(week){ const ws=weekStartDate(week); return new Date(ws.getTime()+7*DAY); }
 function isWithinCurrentWeekWindow(week){
   if (!state.seasonStart) return true;
-  const now = new Date();
-  return now >= weekStartDate(week) && now < weekEndDate(week);
+  const now = new Date(); return now >= weekStartDate(week) && now < weekEndDate(week);
 }
-function hasWeekClosed(week){
-  if (!state.seasonStart) return true;
-  const now = new Date();
-  return now >= weekEndDate(week); // next Tue
-}
+function hasWeekClosed(week){ if (!state.seasonStart) return true; return new Date() >= weekEndDate(week); }
 function fmtDate(d){ return d.toLocaleDateString(undefined,{month:'short',day:'numeric'}); }
 
 // ---------- UI init ----------
 function initUI(){
   $('#weeks').value = state.weeks;
   $('#wkTotal').textContent = state.weeks;
-  // auto-sync currentWeek if seasonStart exists
   if (state.seasonStart) state.currentWeek = weekNumberFromToday();
   $('#wkNow').textContent = state.currentWeek;
   $('#weeklyBet').value = state.defaultBet;
@@ -278,14 +225,7 @@ function initUI(){
   $('#lockUntilTuesday').value = state.lockUntilTuesday ? "1" : "0";
   $('#yr').textContent = new Date().getFullYear();
   $('#audit').textContent = "Audit: " + hashAudit(serializeForAudit());
-  // side-bet participant dropdown
-  const sel = $('#sbOn'); sel.innerHTML = "";
-  state.participants.forEach(p=>{
-    const o=document.createElement('option'); o.value=p; o.textContent=p; sel.appendChild(o);
-  });
-  renderCurrentWeek();
-  renderHistory();
-  renderTotals();
+  renderCurrentWeek(); renderHistory(); renderTotals();
 }
 function serializeForAudit(){
   return [
@@ -294,7 +234,7 @@ function serializeForAudit(){
   ].join('|');
 }
 
-// ---------- Event wiring ----------
+// ---------- Inputs ----------
 ['#weeks','#weeklyBet','#participants','#teams','#seed','#uniquePerWeek',
  '#seasonStart','#lockUntilTuesday'
 ].forEach(id=>{
@@ -327,11 +267,7 @@ $('#shareBtn').addEventListener('click', ()=>{
 (function decodeFromUrl(){
   const sp=new URLSearchParams(location.search).get('state');
   if(!sp) return;
-  try{
-    const incoming=JSON.parse(decodeURIComponent(escape(atob(sp))));
-    state = {...state, ...incoming};
-    save();
-  }catch{}
+  try{ state = {...state, ...JSON.parse(decodeURIComponent(escape(atob(sp))))}; save(); }catch{}
 })();
 
 // ---------- Draw / Reveal ----------
@@ -350,7 +286,6 @@ function drawWeek(week){
   });
   return {week, picks};
 }
-
 function canRevealCurrent(){
   const w = state.currentWeek;
   const prevOk = (w===1) || (state.results[w-1]);
@@ -392,54 +327,17 @@ $('#settleBtn').addEventListener('click', ()=>{
   state.totals[winner] += pot;
   losers.forEach(l=> state.totals[l] -= bet);
 
-  // settle side bets (even odds)
-  const sbs = state.sideBets[w]||[];
-  sbs.forEach(b=>{
-    state.bettorTotals[b.name] = state.bettorTotals[b.name]||0;
-    if(b.on===winner){ state.bettorTotals[b.name] += b.amt; b.win=true; }
-    else{ state.bettorTotals[b.name] -= b.amt; b.win=false; }
-  });
-
   state.results[w] = {winner, bet};
 
   if (state.lockUntilTuesday && state.seasonStart && !hasWeekClosed(w)) {
     alert("Locked until next Tuesday: Week " + (w+1) + " won’t reveal until the current NFL week closes.");
   }
 
-  // advance week if more weeks remain
   if(state.currentWeek < state.weeks){ state.currentWeek += 1; }
   save();
   $('#wkNow').textContent = state.currentWeek;
   renderHistory(); renderTotals(); renderCurrentWeek();
 });
-
-// ---------- Side bets ----------
-$('#addSb').addEventListener('click', ()=>{
-  const w = state.currentWeek;
-  const sched = state.schedule[w];
-  if(!sched){ alert("Reveal the week first."); return; }
-  const name = $('#sbName').value.trim();
-  const on = $('#sbOn').value;
-  const amt = Math.max(1, parseInt($('#sbAmt').value||"1",10));
-  if(!name){ alert("Enter bettor name."); return; }
-  state.sideBets[w] = state.sideBets[w] || [];
-  state.sideBets[w].push({name,on,amt});
-  $('#sbName').value=""; $('#sbAmt').value="10";
-  save(); renderSideBets();
-});
-
-function renderSideBets(){
-  const w = state.currentWeek;
-  const list = state.sideBets[w]||[];
-  const tbl = $('#sbTable'); const tbody = tbl.querySelector('tbody'); tbody.innerHTML="";
-  if(!list.length){ tbl.style.display="none"; $('#sbEmpty').style.display="block"; return; }
-  $('#sbEmpty').style.display="none"; tbl.style.display="table";
-  list.forEach(b=>{
-    const tr=document.createElement('tr');
-    tr.innerHTML = `<td>${b.name}</td><td>${b.on}</td><td>$${b.amt}</td>`;
-    tbody.appendChild(tr);
-  });
-}
 
 // ---------- Renderers ----------
 function renderCurrentWeek(){
@@ -455,7 +353,6 @@ function renderCurrentWeek(){
     } else {
       wrap.innerHTML = `<div class="muted">Week ${w} is not drawn yet. Click <b>Reveal Current Week</b>.</div>`;
     }
-    renderSideBets();
     $('#audit').textContent = "Audit: " + hashAudit(serializeForAudit());
     return;
   }
@@ -491,7 +388,6 @@ function renderCurrentWeek(){
     const v=Math.max(0,parseFloat($('#betOverride').value||"0"));
     state.perWeekBet[w]=v; save(); renderCurrentWeek();
   });
-  renderSideBets();
   $('#audit').textContent = "Audit: " + hashAudit(serializeForAudit());
 }
 
@@ -499,18 +395,13 @@ function renderHistory(){
   const wrap = $('#historyWrap');
   const weeksDone = Object.keys(state.results).map(n=>parseInt(n,10)).sort((a,b)=>a-b);
   if(!weeksDone.length){ wrap.textContent="Nothing yet. Settle Week 1 to start the ledger."; return; }
-  const head = `<thead><tr><th>Week</th>${state.participants.map(p=>`<th>${p}</th>`).join('')}<th>Bet</th><th>Winner</th><th>Side bets: +/−</th></tr></thead>`;
+  const head = `<thead><tr><th>Week</th>${state.participants.map(p=>`<th>${p}</th>`).join('')}<th>Bet</th><th>Winner</th></tr></thead>`;
   const body = weeksDone.map(w=>{
     const picks = state.schedule[w]?.picks||{};
     const bet = state.results[w]?.bet ?? state.defaultBet;
     const winner = state.results[w]?.winner ?? "";
-    const sbs = (state.sideBets[w]||[]);
-    const sbNet = sbs.reduce((acc,b)=> acc + (b.win ? b.amt : -b.amt), 0);
     const cells = state.participants.map(p=>`<td>${picks[p]||''}</td>`).join('');
-    const sbClass = sbNet>=0?'ok':'bad';
-    return `<tr>
-      <td>${w}</td>${cells}<td>$${bet}</td><td>${winner}</td><td class="${sbClass}">$${sbNet||0}</td>
-    </tr>`;
+    return `<tr><td>${w}</td>${cells}<td>$${bet}</td><td>${winner}</td></tr>`;
   }).join('');
   wrap.innerHTML = `<div style="overflow:auto"><table>${head}<tbody>${body}</tbody></table></div>`;
 }
@@ -518,18 +409,10 @@ function renderHistory(){
 function renderTotals(){
   const wrap = $('#totalsWrap');
   const pTotals = state.participants.map(p=>`<div>${p}: <b>${state.totals[p]? (state.totals[p]>=0?'+':'') + '$'+state.totals[p] : '$0'}</b></div>`).join('');
-  const bettors = Object.keys(state.bettorTotals).sort();
-  const bTotals = bettors.length ? bettors.map(n=>`<div>${n}: <b>${state.bettorTotals[n]>=0?'+':''}$${state.bettorTotals[n]}</b></div>`).join('') : '<div class="muted">No side-bettor totals yet.</div>';
   wrap.innerHTML = `
-    <div class="row" style="grid-template-columns:1fr 1fr">
-      <div>
-        <h4 style="margin:6px 0">Participants totals</h4>
-        ${pTotals||'<div class="muted">No results yet.</div>'}
-      </div>
-      <div>
-        <h4 style="margin:6px 0">Side-bettor totals</h4>
-        ${bTotals}
-      </div>
+    <div>
+      <h4 style="margin:6px 0">Participants totals</h4>
+      ${pTotals||'<div class="muted">No results yet.</div>'}
     </div>
   `;
 }
