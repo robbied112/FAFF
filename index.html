@@ -46,7 +46,6 @@
 </head>
 <body>
 <div class="container">
-  <!-- Header -->
   <div class="card">
     <h1>Friends are Friends Forever</h1>
     <div class="flex">
@@ -56,7 +55,6 @@
   </div>
 
   <div class="row">
-    <!-- Left: Setup / Controls -->
     <div class="card">
       <h3 style="margin-top:6px">⚙️ Setup</h3>
 
@@ -136,14 +134,12 @@ Turbo Team</textarea>
       <div class="muted small">Pointer: Week <span id="wkNow">1</span> of <span id="wkTotal">14</span></div>
     </div>
 
-    <!-- Right: Current Week -->
     <div class="card">
       <h3 style="margin-top:6px">📅 Week Detail</h3>
       <div id="currentWrap" class="muted">Set a roster and “Reveal Current Week.”</div>
     </div>
   </div>
 
-  <!-- History -->
   <div class="card">
     <h3 style="margin-top:6px">📜 History & Totals</h3>
     <div class="muted" style="margin-bottom:8px">Winner gets all stakes from opponents who played that week.</div>
@@ -172,13 +168,27 @@ function rngFrom(seed){const [h]=cyrb128(seed);return mulberry32(h)}
 function hashAudit(s){return cyrb128(s).at(0).toString(16).slice(0,8).toUpperCase()}
 const DAY = 24*60*60*1000;
 
+// ---------- Originals (always available) ----------
+const ORIGINAL_TEAMS = [
+  "Bham Bobs",
+  "Sunday Morning Wood",
+  "Naturally Le'Veon'd",
+  "Floatisha's Team",
+  "CLOX",
+  "Whoa Joes",
+  "Ginger Balls",
+  "Pfffffffffft",
+  "Hawk Heaven",
+  "Turbo Team"
+];
+
 // ---------- State ----------
-const STATE_KEY = "FAF_WEEKLY_STATE_V6";
+const STATE_KEY = "FAF_WEEKLY_STATE_V7";
 let state = {
   weeks: 14,
   currentWeek: 1,
   participants: ["Robbie","Shane","Patrick"],
-  teams: [],
+  teams: [], // will be merged with ORIGINAL_TEAMS on load & on edits
   seed: "",
   uniquePerWeek: true,
   defaultBet: 20,
@@ -187,8 +197,7 @@ let state = {
   schedule: {},                       // {week:{picks:{[name]:team}, roster:[names]}}
   results: {},                        // {week:{winner,bet}}
   totals: {},                         // {[participant]: number}
-  // NFL calendar
-  seasonStart: "",
+  seasonStart: "",                    // "YYYY-MM-DD" (Tue)
   lockUntilTuesday: true
 };
 
@@ -196,6 +205,12 @@ let state = {
 function save(){ localStorage.setItem(STATE_KEY, JSON.stringify(state)); }
 function load(){ const raw=localStorage.getItem(STATE_KEY); if(raw){ try{ state={...state,...JSON.parse(raw)} }catch{} } }
 load();
+
+// Ensure originals are always present (no duplicates)
+function ensureOriginalTeams(){
+  const set = new Set([...(state.teams||[]), ...ORIGINAL_TEAMS]);
+  state.teams = Array.from(set);
+}
 
 // ---------- Calendar helpers ----------
 function weekNumberFromToday() {
@@ -211,7 +226,7 @@ function isWithinCurrentWeekWindow(week){ if(!state.seasonStart) return true; co
 function hasWeekClosed(week){ if(!state.seasonStart) return true; return new Date()>=weekEndDate(week); }
 function fmtDate(d){ return d ? d.toLocaleDateString(undefined,{month:'short',day:'numeric'}) : ""; }
 
-// ---------- New: smarter week pointer ----------
+// ---------- Smarter pointer ----------
 function computeCurrentWeek() {
   const pending = Object.keys(state.schedule)
     .map(n => parseInt(n, 10))
@@ -239,10 +254,9 @@ function drawWeek(week, roster){
   return {week, picks, roster: roster.slice()};
 }
 
-// ---------- Totals recompute (safe after any edit) ----------
+// ---------- Totals recompute ----------
 function recomputeTotals(){
   const totals = {};
-  // collect all names seen
   const names = new Set(state.participants);
   Object.values(state.schedule).forEach(s => (s?.roster||[]).forEach(n => names.add(n)));
   names.forEach(n => totals[n]=0);
@@ -285,6 +299,7 @@ function initJump(){
 }
 
 function initUI(){
+  ensureOriginalTeams();
   state.currentWeek = computeCurrentWeek();
 
   $('#weeks').value = state.weeks;
@@ -311,6 +326,7 @@ function renderAll(){
 }
 
 function teamSelect(name, current){
+  // Always show ALL teams (originals + any added)
   const opts = state.teams.map(t => `<option value="${t}" ${t===current?'selected':''}>${t}</option>`).join('');
   return `<select class="teamPick" data-name="${name}">${opts}</select>`;
 }
@@ -361,7 +377,6 @@ function renderCurrentWeek(){
       </div>
     `;
   } else {
-    // picks editor
     const rows = (sched.roster||[]).map(p=>{
       const pick = sched.picks[p] || "";
       return `<tr>
@@ -413,13 +428,13 @@ function renderCurrentWeek(){
     const sched2 = drawWeek(w, list);
     if(!sched2) return;
     state.schedule[w] = sched2;
-    save(); renderCurrentWeek();
+    save(); renderCurrentWeek(); renderHistory();
   });
 
   const betBtn = $('#saveBet');
   if (betBtn) betBtn.addEventListener('click', ()=>{
     const v=Math.max(0,parseFloat($('#betOverride').value||"0"));
-    state.perWeekBet[w]=v; save(); renderCurrentWeek();
+    state.perWeekBet[w]=v; save(); renderCurrentWeek(); renderHistory();
   });
 
   const picksBtn = $('#savePicks');
@@ -431,7 +446,7 @@ function renderCurrentWeek(){
       schedNow.picks[name] = val;
     });
     state.schedule[w] = schedNow;
-    save(); renderCurrentWeek();
+    save(); renderCurrentWeek(); renderHistory();
   });
 
   $('#audit').textContent = "Audit: " + hashAudit(serializeForAudit());
@@ -521,6 +536,8 @@ function renderTotals(){
     state.defaultBet = Math.max(0, parseFloat($('#weeklyBet').value||"0"));
     state.participants = nl($('#participants'));
     state.teams = nl($('#teams'));
+    ensureOriginalTeams(); // keep originals available
+    $('#teams').value = state.teams.join("\n"); // reflect merge in UI
     state.seed = $('#seed').value.trim();
     state.uniquePerWeek = $('#uniquePerWeek').value==="1";
     state.seasonStart = $('#seasonStart').value || "";
@@ -600,7 +617,6 @@ function settleSpecificWeek(w){
 }
 
 $('#settleBtn').addEventListener('click', ()=>{
-  // Oldest revealed-but-unsettled week, else current pointer
   const firstPending = Object.keys(state.schedule)
     .map(n=>parseInt(n,10))
     .sort((a,b)=>a-b)
@@ -609,29 +625,37 @@ $('#settleBtn').addEventListener('click', ()=>{
   settleSpecificWeek(w);
 });
 
-// ---------- Seed-in Week 1 from your note if not present ----------
+// ---------- Seed Week 1 & season start exactly as requested ----------
 function ensurePresetWeek1(){
-  if (state.schedule[1]) return;
-  const needed = ["Robbie","Shane","Patrick"].every(n=>state.participants.includes(n));
-  if (!needed) return;
-  const picks = {
-    "Robbie": "CLOX",
-    "Shane": "Floatisha's Team",
-    "Patrick": "Bham Bobs"
-  };
-  // ensure those teams exist; if not, add them (non-destructive)
-  ["CLOX","Floatisha's Team","Bham Bobs"].forEach(t=>{
-    if(!state.teams.includes(t)) state.teams.push(t);
-  });
-  state.weekRoster[1] = ["Robbie","Shane","Patrick"];
-  state.schedule[1] = { week:1, picks: {...picks}, roster: ["Robbie","Shane","Patrick"] };
-  save();
+  // Always keep original teams available
+  ensureOriginalTeams();
+
+  // If no start date, set to Tue, 2025-09-02
+  if (!state.seasonStart) state.seasonStart = "2025-09-02";
+
+  // Add Week 1 seed if missing (picks as given)
+  if (!state.schedule[1]) {
+    const roster = ["Robbie","Shane","Patrick"];
+    const picks = {
+      "Robbie": "CLOX",
+      "Shane": "Floatisha's Team",
+      "Patrick": "Bham Bobs"
+    };
+    state.weekRoster[1] = roster.slice();
+    state.schedule[1] = { week:1, picks: {...picks}, roster: roster.slice() };
+  }
+
+  // Mark Week 1 settled with Patrick as the winner
+  const betW1 = state.perWeekBet[1] ?? state.defaultBet;
+  state.results[1] = { winner: "Patrick", bet: betW1 };
 }
 
 // ---------- boot ----------
 ensurePresetWeek1();
 recomputeTotals();
-initUI();
+state.currentWeek = computeCurrentWeek();
+save();
+document.addEventListener('DOMContentLoaded', initUI);
 </script>
 </body>
 </html>
