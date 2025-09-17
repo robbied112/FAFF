@@ -183,21 +183,21 @@ const ORIGINAL_TEAMS = [
 ];
 
 // ---------- State ----------
-const STATE_KEY = "FAF_WEEKLY_STATE_V7";
+const STATE_KEY = "FAF_WEEKLY_STATE_V8"; // bumped key to ensure new logic persists cleanly
 let state = {
   weeks: 14,
   currentWeek: 1,
   participants: ["Robbie","Shane","Patrick"],
-  teams: [], // will be merged with ORIGINAL_TEAMS on load & on edits
+  teams: [],
   seed: "",
   uniquePerWeek: true,
   defaultBet: 20,
-  perWeekBet: {},                     // {week:number}
-  weekRoster: {},                     // {week:[names]}
-  schedule: {},                       // {week:{picks:{[name]:team}, roster:[names]}}
-  results: {},                        // {week:{winner,bet}}
-  totals: {},                         // {[participant]: number}
-  seasonStart: "",                    // "YYYY-MM-DD" (Tue)
+  perWeekBet: {},       // {week:number}
+  weekRoster: {},       // {week:[names]}
+  schedule: {},         // {week:{picks:{[name]:team}, roster:[names]}}
+  results: {},          // {week:{winner,bet}}
+  totals: {},           // {[participant]: number}
+  seasonStart: "",      // "YYYY-MM-DD" (Tue)
   lockUntilTuesday: true
 };
 
@@ -224,15 +224,16 @@ function weekStartDate(week){ if(!state.seasonStart) return null; const start=ne
 function weekEndDate(week){ const ws=weekStartDate(week); if(!ws) return null; return new Date(ws.getTime()+7*DAY); }
 function isWithinCurrentWeekWindow(week){ if(!state.seasonStart) return true; const n=new Date(); const ws=weekStartDate(week), we=weekEndDate(week); return n>=ws && n<we; }
 function hasWeekClosed(week){ if(!state.seasonStart) return true; return new Date()>=weekEndDate(week); }
+function hasWeekOpened(week){ if(!state.seasonStart) return true; const n=new Date(); const ws=weekStartDate(week); return n>=ws; }
 function fmtDate(d){ return d ? d.toLocaleDateString(undefined,{month:'short',day:'numeric'}) : ""; }
 
 // ---------- Smarter pointer ----------
 function computeCurrentWeek() {
-  const pending = Object.keys(state.schedule)
-    .map(n => parseInt(n, 10))
-    .sort((a,b)=>a-b)
-    .find(w => !state.results[w]);
-  if (pending) return pending;
+  // find the earliest week without a recorded result, regardless of whether it was drawn
+  for(let w=1; w<=state.weeks; w++){
+    if(!state.results[w]) return w;
+  }
+  // if everything is settled, fall back to calendar pointer
   if (state.seasonStart) return weekNumberFromToday();
   return state.currentWeek || 1;
 }
@@ -326,7 +327,6 @@ function renderAll(){
 }
 
 function teamSelect(name, current){
-  // Always show ALL teams (originals + any added)
   const opts = state.teams.map(t => `<option value="${t}" ${t===current?'selected':''}>${t}</option>`).join('');
   return `<select class="teamPick" data-name="${name}">${opts}</select>`;
 }
@@ -363,7 +363,7 @@ function renderCurrentWeek(){
 
   if(!sched){
     wrap.innerHTML = `
-      <div class="muted">Week ${w}${weekWindow} is not drawn yet. Edit roster if needed, then click <b>Reveal Current Week</b>.</div>
+      <div class="muted">Week ${w}${weekWindow} has not been drawn yet. You can draw it now (even if the week already passed) or just set the result from History.</div>
       ${rosterEditor}
       <div class="grid" style="margin-top:10px">
         <div>
@@ -456,17 +456,20 @@ function renderHistory(){
   const wrap = $('#historyWrap');
   const weeks = Array.from({length: state.weeks}, (_,i)=>i+1);
   const head = `<thead><tr><th>Week</th><th>Roster</th><th>Picks</th><th>Bet</th><th>Winner</th><th>Actions</th></tr></thead>`;
+  const calWeek = weekNumberFromToday();
+
   const rows = weeks.map(w=>{
     const sched = state.schedule[w];
-    const roster = sched?.roster?.join(', ') || '';
+    const roster = sched?.roster?.join(', ') || (state.weekRoster[w]?.join(', ') || '');
     const picks = sched ? Object.entries(sched.picks||{}).map(([n,t])=>`${n}: ${t}`).join('; ') : '';
     const bet = (state.results[w]?.bet) ?? (state.perWeekBet[w] ?? state.defaultBet);
     const winner = state.results[w]?.winner ?? '';
+    const canSettle = (w <= calWeek) && !state.results[w]; // allow settle for past/current weeks even if not drawn
     const actions = `
       <div class="row-actions">
         <button class="btn" data-goto="${w}">🔎 View</button>
         ${sched ? `<button class="btn" data-edit="${w}">✏️ Edit Winner/Bet</button>` : ''}
-        ${sched && !state.results[w] ? `<button class="btn primary" data-settle="${w}">✅ Settle</button>` : ''}
+        ${canSettle ? `<button class="btn primary" data-settle="${w}">✅ Settle</button>` : ''}
         ${state.results[w] ? `<button class="btn warn" data-clear="${w}">♻️ Unset Result</button>` : ''}
       </div>
     `;
@@ -492,7 +495,8 @@ function renderHistory(){
   wrap.querySelectorAll('[data-edit]').forEach(btn=>{
     btn.addEventListener('click', e=>{
       const w = parseInt(e.currentTarget.getAttribute('data-edit'),10);
-      const sched = state.schedule[w]; if(!sched){ alert("Reveal the week first."); return; }
+      ensureWeekExists(w); // make sure a schedule is present
+      const sched = state.schedule[w];
       const roster = sched.roster || [];
       const winner = prompt(`Who won Week ${w}? Enter exact name:\n${roster.join(", ")}`, state.results[w]?.winner || "");
       if(!winner || !roster.includes(winner.trim())){ alert("Pick a valid participant from this week’s roster."); return; }
@@ -536,8 +540,8 @@ function renderTotals(){
     state.defaultBet = Math.max(0, parseFloat($('#weeklyBet').value||"0"));
     state.participants = nl($('#participants'));
     state.teams = nl($('#teams'));
-    ensureOriginalTeams(); // keep originals available
-    $('#teams').value = state.teams.join("\n"); // reflect merge in UI
+    ensureOriginalTeams();
+    $('#teams').value = state.teams.join("\n");
     state.seed = $('#seed').value.trim();
     state.uniquePerWeek = $('#uniquePerWeek').value==="1";
     state.seasonStart = $('#seasonStart').value || "";
@@ -569,18 +573,21 @@ $('#shareBtn').addEventListener('click', ()=>{
 // ---------- Reveal / Settle handlers ----------
 function canRevealCurrent(){
   const w = state.currentWeek;
-  const prevOk = (w===1) || (state.results[w-1]);
+  const prevOk = (w===1) || (state.results[w-1]); // require prior settled in sequence
   const notDrawn = !state.schedule[w];
-  const inWindow = isWithinCurrentWeekWindow(w);
-  return prevOk && notDrawn && inWindow;
+  // allow reveal if the week has opened (or closed). Only block future weeks.
+  const opened = hasWeekOpened(w);
+  return prevOk && notDrawn && opened;
 }
 
 $('#revealBtn').addEventListener('click', ()=>{
   const w = state.currentWeek;
-  if(!isWithinCurrentWeekWindow(w) && state.seasonStart){
-    const ws = weekStartDate(w), we = weekEndDate(w);
-    alert(`Week ${w} can be revealed only between ${fmtDate(ws)} and ${fmtDate(we ? new Date(we.getTime()-1) : null)}.`);
-    return;
+  if(state.seasonStart){
+    const ws = weekStartDate(w);
+    if(!hasWeekOpened(w)){
+      alert(`Week ${w} can be revealed starting ${fmtDate(ws)}.`);
+      return;
+    }
   }
   if(!canRevealCurrent()){
     if (state.schedule[w]) { alert("This week is already revealed. Settle it or use History to edit."); }
@@ -596,9 +603,23 @@ $('#revealBtn').addEventListener('click', ()=>{
   save(); renderCurrentWeek(); renderHistory();
 });
 
+function ensureWeekExists(w){
+  if(state.schedule[w]) return;
+  const roster = (state.weekRoster[w] && state.weekRoster[w].length) ? state.weekRoster[w] : state.participants.slice();
+  if (roster.length < 2) return; // keep it empty; user can add roster then redraw
+  // draw deterministically so we have a sched to attach results to
+  const sched = drawWeek(w, roster);
+  if (sched) state.schedule[w] = sched;
+}
+
 function settleSpecificWeek(w){
+  // If no schedule exists (week was never revealed), create a basic one so we can store the result.
+  ensureWeekExists(w);
   const sched = state.schedule[w];
-  if(!sched){ alert("Reveal the week first."); return; }
+  if(!sched){
+    alert("Set a roster for this week in the Week Detail pane, then try settling again.");
+    return;
+  }
   const roster = sched.roster || ((state.weekRoster[w] && state.weekRoster[w].length)?state.weekRoster[w]:state.participants);
   const winner = prompt("Who won this week? Enter exact name:\n" + roster.join(", "), state.results[w]?.winner || "");
   if(!winner || !roster.includes(winner.trim())){ alert("Pick a valid participant from this week’s roster."); return; }
@@ -617,23 +638,21 @@ function settleSpecificWeek(w){
 }
 
 $('#settleBtn').addEventListener('click', ()=>{
-  const firstPending = Object.keys(state.schedule)
-    .map(n=>parseInt(n,10))
-    .sort((a,b)=>a-b)
-    .find(w => !state.results[w]);
-  const w = firstPending || state.currentWeek;
-  settleSpecificWeek(w);
+  // choose the earliest week <= calendar week that has no result (even if not drawn yet)
+  const calWeek = weekNumberFromToday();
+  let target = null;
+  for(let w=1; w<=Math.min(calWeek, state.weeks); w++){
+    if(!state.results[w]){ target = w; break; }
+  }
+  if(!target) target = state.currentWeek;
+  settleSpecificWeek(target);
 });
 
-// ---------- Seed Week 1 & season start exactly as requested ----------
+// ---------- Seed Week 1 & season start as requested ----------
 function ensurePresetWeek1(){
-  // Always keep original teams available
   ensureOriginalTeams();
+  if (!state.seasonStart) state.seasonStart = "2025-09-02"; // Tue
 
-  // If no start date, set to Tue, 2025-09-02
-  if (!state.seasonStart) state.seasonStart = "2025-09-02";
-
-  // Add Week 1 seed if missing (picks as given)
   if (!state.schedule[1]) {
     const roster = ["Robbie","Shane","Patrick"];
     const picks = {
@@ -645,9 +664,8 @@ function ensurePresetWeek1(){
     state.schedule[1] = { week:1, picks: {...picks}, roster: roster.slice() };
   }
 
-  // Mark Week 1 settled with Patrick as the winner
   const betW1 = state.perWeekBet[1] ?? state.defaultBet;
-  state.results[1] = { winner: "Patrick", bet: betW1 };
+  state.results[1] = state.results[1] || { winner: "Patrick", bet: betW1 };
 }
 
 // ---------- boot ----------
